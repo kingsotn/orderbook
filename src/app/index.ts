@@ -1,24 +1,19 @@
-export interface AuctionItem {
-    id: string;
-    gpuCount: number;
-    startTime: Date;
-    endTime: Date;
-    minBid: number;
-    listedBy: string;
-    reservedBy?: string;
-}
-
 export interface BidAsk {
+    // bid ask
     id: string;
-    auctionItemId: string;
     userId: string;
-    amount: number;
     type: 'bid' | 'ask';
     timestamp: Date;
+
+    // user selects
+    price: number;
+    gpuCount: number; // 1-8
+    durationDesired: string; // 1 hour --> 31 days
+    start: Date;
+    end: Date;
 }
 
 export interface OrderBook {
-    auctionItemId: string;
     bids: BidAsk[];
     asks: BidAsk[];
 }

@@ -1,12 +1,14 @@
-// src/app/api/bidsAsks.ts
+// src/pages/api/bidsAsks.ts
 import { NextApiRequest, NextApiResponse } from 'next';
 import { v4 as uuidv4 } from 'uuid';
-import { BidAsk } from '../..';
+import { BidAsk, OrderBook } from '../../app';
+import { updateOrderBook } from '../../server/websocket';
 
 let bidsAsks: BidAsk[] = [];
+let orderBook: OrderBook = { bids: [], asks: [] };
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
-    const { method, query, body } = req;
+    const { method, body } = req;
 
     if (method === 'POST') {
         const newBidAsk: BidAsk = {
@@ -15,13 +17,19 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
             timestamp: new Date(),
         };
         bidsAsks.push(newBidAsk);
+
+        if (newBidAsk.type === 'bid') {
+            orderBook.bids.push(newBidAsk);
+        } else {
+            orderBook.asks.push(newBidAsk);
+        }
+        updateOrderBook(orderBook);
+
         return res.status(201).json(newBidAsk);
     }
 
     if (method === 'GET') {
-        const { auctionItemId } = query;
-        const filteredBidAsks = bidsAsks.filter(ba => ba.auctionItemId === auctionItemId);
-        return res.status(200).json(filteredBidAsks);
+        return res.status(200).json(bidsAsks);
     }
 
     res.setHeader('Allow', ['POST', 'GET']);
