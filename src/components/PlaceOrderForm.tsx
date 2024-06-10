@@ -1,8 +1,8 @@
 "use client"; // This is a client component 👈🏽
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { RadioGroup, Radio, cn, Input, Spacer, Slider } from "@nextui-org/react";
 import { DatePicker } from "@nextui-org/react";
-import { now, getLocalTimeZone } from "@internationalized/date";
+import { now, getLocalTimeZone, today, DateValue, parseDateTime, CalendarDateTime } from "@internationalized/date";
 
 export const CustomRadio = (props: any) => {
     const { children, ...otherProps } = props;
@@ -12,16 +12,19 @@ export const CustomRadio = (props: any) => {
             {...otherProps}
             classNames={{
                 base: cn(
-                    "font-mono text-sm", // Smaller text
-                    "inline-flex m-0 items-center justify-start", // Align items to start to keep radio on the left
-                    "w-auto cursor-pointer rounded-md gap-2 p-2 border border-transparent",
-                    "bg-content1 hover:bg-content2",
-                    "hover:scale-105 transition-transform duration-200", // Hover scale effect
-                    "data-[selected=true]:border-primary"
+                    "font-mono text-xxs", // Smaller text size
+                    "inline-flex items-center", // Align items to center
+                    "m-0", // Minimal margins and padding
+                    "cursor-pointer rounded gap-1", // Smaller gap and border-radius
+                    "border border-transparent", // Transparent border by default
+                    "transition-transform duration-200", // Transition effect for transformations
+                    "hover:scale-105", // Hover scale effect
+                    "w-auto h-4" // Adjust width and height for smaller size
                 ),
             }}
         >
-            {children}
+            <span className="radio-button" />
+            <span className="text-xxs">{children}</span> {/* Set text size */}
         </Radio>
     );
 };
@@ -72,17 +75,49 @@ const DateTimeSlider: React.FC<DateTimeSliderProps> = ({ startDate, setStartDate
     };
 
     const formatDateTime = (date: Date): string => {
-        return date.toLocaleString('en-US', {
+        // Extract the necessary parts from the Date object
+        const options: Intl.DateTimeFormatOptions = {
             month: 'short',
             day: 'numeric',
+            year: 'numeric',
             hour: 'numeric',
-            minute: '2-digit',
             hour12: true,
-        })
+        };
+
+        // Extract month, day, year, and time with period using Intl.DateTimeFormat
+        const formattedDate = new Intl.DateTimeFormat('en-US', options).format(date);
+        const [monthDay, year, timePeriod] = formattedDate.split(', ');
+        const [time, period] = timePeriod.split(" ");
+        // console.log(monthDay, year)
+        const formattedString = `${monthDay}, ${year} @${time}${period}`;
+
+        // console.log("formatted:", formattedString);
+        return formattedString;
     };
 
     const endDate = calculateEndDate(startDate, duration);
 
+    // only for days before "today"
+    const isDateUnavailable = (date: DateValue): boolean => {
+        const todayDate = today(getLocalTimeZone());
+        return (
+            date.compare(todayDate) < 0 // Check if the date is before today
+        );
+    };
+
+    const startDateValue = new Date();
+
+    // Convert Date to DateValue inline, adding 1 to the hour
+    const startDateAsDateValue: DateValue = parseDateTime(
+        `${startDateValue.getFullYear()}-${(startDateValue.getMonth() + 1).toString().padStart(2, '0')}-${startDateValue.getDate().toString().padStart(2, '0')}T${(startDateValue.getHours() + 1).toString().padStart(2, '0')}:00`
+    );
+
+    const handleDateChange = (value: CalendarDateTime) => {
+        // Convert CalendarDateTime to Date
+        const convertedDate = new Date(value.year, value.month - 1, value.day, value.hour);
+        setStartDate(convertedDate);
+        console.log("Selected date:", convertedDate);
+    };
     return (
         <div className="max-w-xl w-full space-y-4">
             <div className="flex flex-row gap-4">
@@ -92,10 +127,10 @@ const DateTimeSlider: React.FC<DateTimeSliderProps> = ({ startDate, setStartDate
                     hideTimeZone
                     showMonthAndYearPickers
                     granularity='hour'
-                    defaultValue={now(getLocalTimeZone())}
+                    defaultValue={startDateAsDateValue}
                     className="w-full"
-                // value={startDate}
-                // onChange={setStartDate}
+                    isDateUnavailable={isDateUnavailable}
+                    onChange={handleDateChange}
                 />
             </div>
             <div className="flex items-center space-x-4 max-w-xl w-full border border-gray-300 rounded-lg p-2">
@@ -121,8 +156,11 @@ const DateTimeSlider: React.FC<DateTimeSliderProps> = ({ startDate, setStartDate
                     <span>{formatValue(duration)} {getLabel(duration)}</span>
                 </div>
             </div>
-            <div className='font-mono'>
-                {formatDateTime(startDate)} — {formatDateTime(endDate)}
+            <div className='font-mono text-xs ml-1.5'>
+                {formatDateTime(startDate)}
+            </div>
+            <div className='font-mono text-xs ml-1.5 mt-0 w-full align--baseline'>
+                {formatDateTime(endDate)}
             </div>
         </div>
     );
@@ -134,12 +172,21 @@ const CustomForm: React.FC = () => {
     const [price, setPrice] = useState<string>('');
     const [gpus, setGpus] = useState<string>('');
     const marketPrice = "4.31" // let's say it's this for now
+    const defaultGpuCount = "1"
+    const [isFilled, setIsFilled] = useState(false); // coloring the dollar sign
+
+    // date stuff
+    const initialDate = new Date();
+    initialDate.setHours(initialDate.getHours() + 1, 0, 0, 0); // Round to the next hour
+    const [startDate, setStartDate] = useState<Date>(initialDate);
+    const [duration, setDuration] = useState(25); // Default value
 
     const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         if (/^\d*\.?\d{0,2}$/.test(value)) {  // Validate to two decimal places
             setPrice(value);
         }
+        setIsFilled(e.target.value.trim() !== '');
     };
 
     const handleGpusChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -151,39 +198,90 @@ const CustomForm: React.FC = () => {
     };
 
 
-    const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>, nextInputId: string, placeholderValue: string) => {
-        if (e.key === 'Enter' || e.key === 'Tab') {
-            if (e.currentTarget.value === '') {
-                e.currentTarget.value = placeholderValue;
-                if (e.currentTarget.id === 'price-input') {
+    const handleKeyPress = (
+        e: React.KeyboardEvent<HTMLInputElement>,
+        nextInputId: string,
+        previousInputId: string,
+        placeholderValue: string
+    ) => {
+        const { key, shiftKey, currentTarget } = e;
+        const currentId = currentTarget.id;
+
+        const setPlaceholderIfEmpty = () => {
+            if (currentTarget.value === '') {
+                currentTarget.value = placeholderValue;
+                if (currentId === 'price-input') {
                     setPrice(placeholderValue);
-                } else if (e.currentTarget.id === 'gpus-input') {
+                } else if (currentId === 'gpus-input') {
                     setGpus(placeholderValue);
                 }
             }
+        };
+
+        if ((e.key === 'Enter' || e.key === 'Tab') && e.currentTarget.value === "") {
+            if (e.currentTarget.id === 'price-input') {
+                e.currentTarget.value = marketPrice;
+                const roundedPrice = Math.round(parseFloat(marketPrice) * 100) / 100;
+                setPrice(roundedPrice.toFixed(2)); // Ensure it's always two decimal places
+            } else if (e.currentTarget.id === 'gpus-input') {
+                e.currentTarget.value = defaultGpuCount;
+                setGpus(defaultGpuCount); // Ensure it's always two decimal places
+            }
+
             e.preventDefault();
-            const nextInput = document.getElementById(nextInputId);
+
+            // Move focus to the next input if needed
+            const nextInput = document.getElementById(e.currentTarget.id === 'price-input' ? 'gpus-input' : 'price-input');
+            nextInput?.focus();
+            setIsFilled(true);
+        } else if ((e.key === 'Enter' || e.key === 'Tab') && e.currentTarget.value !== "") {
+            if (e.currentTarget.id === 'price-input') {
+                const roundedPrice = Math.round(parseFloat(e.currentTarget.value) * 100) / 100;
+                setPrice(roundedPrice.toFixed(2)); // Ensure it's always two decimal places
+            } else if (e.currentTarget.id === 'gpus-input') {
+                setGpus(e.currentTarget.value); // Ensure it's always two decimal places
+            }
+
+            e.preventDefault();
+
+            // Move focus to the next input if needed
+            const nextInput = document.getElementById(e.currentTarget.id === 'price-input' ? 'gpus-input' : 'price-input');
             nextInput?.focus();
         }
+
+
+        if (key === 'Tab') {
+            e.preventDefault();
+            if (!shiftKey) {
+                setPlaceholderIfEmpty();
+                const nextInput = document.getElementById(nextInputId);
+                nextInput?.focus();
+            } else if (shiftKey) {
+                const previousInput = document.getElementById(previousInputId);
+                previousInput?.focus();
+            }
+        }
     };
-
-
-
 
     return (
         <>
             <Input
                 type="number"
-                label="Market Price"
+                label="Price"
+                step={0.01}
                 value={price}
                 placeholder={marketPrice}
                 className="font-mono max-w-xl w-full"
                 id="price-input"
-                startContent={<span className="text-default-400 text-small">$</span>}
-                endContent={<span className="text-default-400 text-small">/gpuhr</span>}
+                startContent={
+                    <span className={`text-small ${isFilled ? 'text-black' : 'text-default-400'}`}>
+                        $
+                    </span>
+                }
+                endContent={<span className="text-default-400 text-xs">/gpuhr</span>}
                 onChange={handlePriceChange}
-                onKeyDown={(e) => handleKeyPress(e, 'gpus-input', marketPrice)}
-                fullWidth
+                onKeyDown={(e) => handleKeyPress(e, 'gpus-input', 'previous-input-id', 'default-price')}
+                errorMessage={"Enter a value"}
             />
             <Spacer y={1.5} />
             <Input
@@ -193,43 +291,22 @@ const CustomForm: React.FC = () => {
                 placeholder="1"
                 className="font-mono max-w-xl w-full"
                 id="gpus-input"
-                endContent={<span className="text-default-400 text-small">amount</span>}
+                endContent={<span className="text-default-400 text-xs">amount</span>}
                 onChange={handleGpusChange}
-                onKeyDown={(e) => handleKeyPress(e, '', '1')}
-                fullWidth
+                onKeyDown={(e) => handleKeyPress(e, 'next-input-id', 'price-input', 'default-gpus')}
             />
+            <DateTimeSlider startDate={startDate} setStartDate={setStartDate} duration={duration} setDuration={setDuration} />
         </>
+
     );
 };
 
 
 const PlaceOrderForm: React.FC = () => {
-
-    // date stuff
-    const initialDate = new Date();
-    initialDate.setHours(initialDate.getHours() + 1, 0, 0, 0); // Round to the next hour
-    const [startDate, setStartDate] = useState(initialDate);
-    const [duration, setDuration] = useState(25); // Default value
-
-    const calculateEndDate = (start: Date, duration: number): Date => {
-        const startDateCopy = new Date(start);
-        if (duration <= 50) {
-            const hours = 1 + Math.floor((duration * 22) / 50);
-            startDateCopy.setHours(startDateCopy.getHours() + hours);
-        } else {
-            const days = 1 + Math.floor(((duration - 50) * 30) / 50);
-            startDateCopy.setDate(startDateCopy.getDate() + days);
-        }
-        // startDateCopy.setMinutes(59); // Set minutes to 59
-        return startDateCopy;
-    };
-
-    const endDate = calculateEndDate(startDate, duration);
-
     return (
         <>
             <Spacer y={3} />
-            <RadioGroup orientation='horizontal' className="max-w-xl w-full">
+            <RadioGroup orientation='horizontal' className="max-w-xl w-full text-xxs">
                 <CustomRadio value="buy">
                     Buy
                 </CustomRadio>
@@ -240,7 +317,6 @@ const PlaceOrderForm: React.FC = () => {
             </RadioGroup>
             <Spacer y={1.5} />
             <CustomForm />
-            <DateTimeSlider startDate={startDate} setStartDate={setStartDate} duration={duration} setDuration={setDuration} />
         </>
     );
 };

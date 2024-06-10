@@ -31,3 +31,8 @@ body {
     text-wrap: balance;
   }
 }
+
+
+.text-xxs {
+  font-size: 0.9rem; /* or any smaller size */
+}
