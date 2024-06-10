@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { BidAsk } from '../../app';
+import { BidAsk } from '../../app/types';
 
 let bidsAsks: BidAsk[] = []; // This should be the same array used in your bidsAsks.ts file
 

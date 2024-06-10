@@ -1,7 +1,7 @@
 // src/pages/api/bidsAsks.ts
 import { NextApiRequest, NextApiResponse } from 'next';
 import { v4 as uuidv4 } from 'uuid';
-import { BidAsk, OrderBook } from '../../app';
+import { BidAsk, OrderBook } from '../../app/types';
 import { updateOrderBook } from '../../server/websocket';
 
 let bidsAsks: BidAsk[] = [];
@@ -18,7 +18,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
         };
         bidsAsks.push(newBidAsk);
 
-        if (newBidAsk.type === 'bid') {
+        if (newBidAsk.bidAsk === 'bid') {
             orderBook.bids.push(newBidAsk);
         } else {
             orderBook.asks.push(newBidAsk);

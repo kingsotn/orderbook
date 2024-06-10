@@ -1,6 +1,6 @@
 // src/server/websocket.ts
 import { WebSocketServer } from 'ws';
-import { OrderBook } from '../app';
+import { OrderBook } from '../app/types';
 
 let orderBook: OrderBook = { bids: [], asks: [] };
 

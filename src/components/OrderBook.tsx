@@ -1,6 +1,6 @@
-"use client"; // This is a client component 👈🏽
+"use client";
 import React, { useEffect, useState } from 'react';
-import { OrderBook } from '../app';
+import { OrderBook } from '../app/types';
 
 const OrderBookComponent: React.FC = () => {
     const [orderBook, setOrderBook] = useState<OrderBook>({ bids: [], asks: [] });

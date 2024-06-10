@@ -1,6 +1,6 @@
 "use client"; // This is a client component 👈🏽
 import React, { useEffect, useState } from 'react';
-import { BidAsk } from '../app';
+import { BidAsk } from '../app/types';
 
 const RecentTransactions: React.FC = () => {
     const [transactions, setTransactions] = useState<BidAsk[]>([]);
@@ -32,7 +32,7 @@ const RecentTransactions: React.FC = () => {
                 <tbody>
                     {transactions.map(transaction => (
                         <tr key={transaction.id}>
-                            <td>{transaction.type}</td>
+                            <td>{transaction.bidAsk}</td>
                             <td>${transaction.price}</td>
                             <td>{transaction.gpuCount}</td>
                             <td>{transaction.durationDesired}</td>
