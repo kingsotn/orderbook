@@ -20,6 +20,7 @@
     "next": "14.2.3",
     "react": "^18",
     "react-dom": "^18",
+    "react-transition-group": "^4.4.5",
     "uuid": "^9.0.1",
     "ws": "^8.17.0"
   },
@@ -27,6 +28,7 @@
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "@types/react-transition-group": "^4.4.10",
     "@types/uuid": "^9.0.8",
     "@types/ws": "^8.5.10",
     "concurrently": "^8.2.2",
