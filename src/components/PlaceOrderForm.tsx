@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { RadioGroup, Radio, cn, Input, Spacer, Slider } from "@nextui-org/react";
 import { DatePicker } from "@nextui-org/react";
 import { now, getLocalTimeZone, today, DateValue, parseDateTime, CalendarDateTime } from "@internationalized/date";
+import { Tabs, Tab } from "@nextui-org/react";
 
 export const CustomRadio = (props: any) => {
     const { children, ...otherProps } = props;
@@ -42,22 +43,22 @@ const DateTimeSlider: React.FC<DateTimeSliderProps> = ({ setStartDate, duration,
         setDuration(val);
     };
 
-    const formatValue = (val: any) => {
+    const getHourNumber = (val: any) => {
         if (val <= 50) {
             const hours = 1 + Math.floor((val * 22) / 50);
             return hours;
         } else {
-            const days = 1 + Math.floor(((val - 50) * 30) / 50);
+            const days = 1 + Math.floor(((val - 50) * 89) / 50);
             return days;
         }
     };
 
     const getLabel = (val: any) => {
         if (val <= 50) {
-            const hours = formatValue(val);
+            const hours = getHourNumber(val);
             return hours === 1 ? "hour" : "hours";
         } else {
-            const days = formatValue(val);
+            const days = getHourNumber(val);
             return days === 1 ? "day" : "days";
         }
     };
@@ -75,7 +76,7 @@ const DateTimeSlider: React.FC<DateTimeSliderProps> = ({ setStartDate, duration,
 
     // Convert Date to DateValue inline, adding 1 to the hour
     const startDateAsDateValue: DateValue = parseDateTime(
-        `${startDateValue.getFullYear()}-${(startDateValue.getMonth() + 1).toString().padStart(2, '0')}-${startDateValue.getDate().toString().padStart(2, '0')}T${(startDateValue.getHours() + 1).toString().padStart(2, '0')}:00`
+        `${startDateValue.getFullYear()}-${(startDateValue.getMonth() + 1).toString().padStart(2, '0')}-${startDateValue.getDate().toString().padStart(2, '0')}T${(startDateValue.getHours()).toString().padStart(2, '0')}:00`
     );
 
     const handleDateChange = (value: CalendarDateTime) => {
@@ -100,13 +101,14 @@ const DateTimeSlider: React.FC<DateTimeSliderProps> = ({ setStartDate, duration,
                     onChange={handleDateChange}
                 />
             </div>
-            <div className="flex items-center space-x-4 max-w-xl w-full border border-gray-300 rounded-lg p-1">
+            <div className="flex items-center space-x-4 max-w-xl w-full border border-gray-200 rounded-lg p-1">
                 <div className="flex-grow max-w-xs w-full">
                     <Slider
                         step={1}
                         value={duration}
                         color={'foreground'}
                         size="sm"
+                        minValue={1}
                         onChange={handleChange}
                         aria-label="Duration slider"
                         classNames={{
@@ -120,8 +122,10 @@ const DateTimeSlider: React.FC<DateTimeSliderProps> = ({ setStartDate, duration,
                         }}
                     />
                 </div>
-                <div className="w-[93px] bg-gray-50 px-4 py-1 text-gray-600 rounded-r-lg border-l items-center font-mono text-xs text-center flex justify-center bg-gray-300 select-none">
-                    <span>{formatValue(duration)} {getLabel(duration)}</span>
+                <div className="flex justify-end">
+                    <div className="text-right w-[93px] px-4 py-1 text-gray-600 rounded-r-lg border-l items-center font-mono text-xs flex justify-center bg-gray-200 select-none">
+                        <span>{getHourNumber(duration)} {getLabel(duration)}</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -143,7 +147,8 @@ const CustomForm: React.FC<{
     defaultGpuCount: string,
     setIsFilled: React.Dispatch<React.SetStateAction<boolean>>
     isFilled: boolean;
-}> = ({ price, setPrice, gpus, setGpus, setStartDate, duration, setDuration, marketPrice, defaultGpuCount, setIsFilled, isFilled }) => {
+    orderType: string;
+}> = ({ price, setPrice, gpus, setGpus, setStartDate, duration, setDuration, marketPrice, defaultGpuCount, setIsFilled, isFilled, orderType }) => {
 
     const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
@@ -199,7 +204,6 @@ const CustomForm: React.FC<{
             nextInput?.focus();
             setIsFilled(true);
         } else if ((e.key === 'Enter' || e.key === 'Tab') && e.currentTarget.value !== "") {
-            console.log('here')
             if (e.currentTarget.id === 'price-input') {
                 const roundedPrice = Math.round(parseFloat(e.currentTarget.value) * 100) / 100;
                 setPrice(roundedPrice.toFixed(2)); // Ensure it's always two decimal places
@@ -211,7 +215,6 @@ const CustomForm: React.FC<{
 
             // Move focus to the next input if needed
             const nextInput = document.getElementById(nextInputId);
-            console.log('next', nextInput)
             nextInput?.focus();
             setIsFilled(true);
         }
@@ -222,7 +225,6 @@ const CustomForm: React.FC<{
             e.preventDefault();
             if (!shiftKey) {
                 const nextInput = document.getElementById(nextInputId);
-                console.log('ni2', nextInput)
                 nextInput?.focus();
             } else if (shiftKey) {
                 const previousInput = document.getElementById(previousInputId);
@@ -241,6 +243,8 @@ const CustomForm: React.FC<{
                 placeholder={marketPrice}
                 className="font-mono max-w-xl w-full"
                 id="price-input"
+                isDisabled={orderType.split(" ")[0] === "Market"}
+                isRequired={orderType.split(" ")[0] === "Buy" || orderType.split(" ")[0] === "Sell"}
                 startContent={
                     <span className={`text-small ${isFilled ? 'text-black' : 'text-default-400'}`}>
                         $
@@ -257,6 +261,7 @@ const CustomForm: React.FC<{
                 label="GPUs"
                 value={gpus}
                 placeholder="1"
+                isRequired
                 className="font-mono max-w-xl w-full"
                 id="gpus-input"
                 endContent={<span className="text-default-400 text-xs">amount</span>}
@@ -286,7 +291,6 @@ interface ReceiptType {
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import { AnimatePresence, motion } from "framer-motion"
 const Receipt: React.FC<{ receiptData: ReceiptType }> = ({ receiptData }) => {
-
     const {
         refNumber,
         orderType,
@@ -298,26 +302,35 @@ const Receipt: React.FC<{ receiptData: ReceiptType }> = ({ receiptData }) => {
         duration,
     } = receiptData;
 
+    useEffect(() => {
+        console.log("orderType", orderType);
+    }, [orderType]);
+
     const formatDateTime = (date: Date): string => {
-        // Extract the necessary parts from the Date object
         const options: Intl.DateTimeFormatOptions = {
             month: 'short',
-            day: 'numeric',
+            day: '2-digit', // Ensure day is zero-padded
             year: 'numeric',
             hour: 'numeric',
+            minute: 'numeric', // Added minute for more precise time
             hour12: true,
         };
 
         // Extract month, day, year, and time with period using Intl.DateTimeFormat
         const formattedDate = new Intl.DateTimeFormat('en-US', options).format(date);
         const [monthDay, year, timePeriod] = formattedDate.split(', ');
-        const [time, period] = timePeriod.split(" ");
-        // console.log(monthDay, year)
-        const formattedString = `${monthDay}, ${year} @${time}${period}`;
+        const [month, day] = monthDay.split(' ');
+        const [time, period] = timePeriod.split(' ');
 
-        // console.log("formatted:", formattedString);
+        // Ensure day is zero-padded
+        const zeroPaddedDay = day.padStart(2, '0');
+
+        // Construct the final formatted string
+        const formattedString = `${month} ${zeroPaddedDay}, ${year} @${time} ${period}`;
+
         return formattedString;
     };
+
 
     const calculateEndDate = (start: Date, duration: number): Date => {
         const startDateCopy = new Date(start);
@@ -331,17 +344,35 @@ const Receipt: React.FC<{ receiptData: ReceiptType }> = ({ receiptData }) => {
         return startDateCopy;
     };
 
-    const endDate = calculateEndDate(startDate, duration);
+    const getHourNumber = (val: number): number => {
+        if (val <= 50) {
+            const hours = 1 + Math.floor((val * 22) / 50);
+            return hours;
+        } else {
+            const days = 1 + Math.floor(((val - 50) * 89) / 50);
+            return days;
+        }
+    };
 
-    console.log("ref", refNumber)
+    const getHourLabel = (val: number): string => {
+        if (val <= 50) {
+            const hours = getHourNumber(val);
+            return hours === 1 ? "hour" : "hours";
+        } else {
+            const days = getHourNumber(val);
+            return days === 1 ? "day" : "days";
+        }
+    };
+
+    const endDate = calculateEndDate(startDate, duration);
 
     const receiptFields = [
         { label: 'Ref Number', value: refNumber },
         { label: 'Transaction Type', value: orderType ? orderType : "" },
         { label: 'Price /gpuhr', value: price ? `$ ${price}` : "" },
         { label: 'GPU Count', value: gpuCount ? gpuCount : "" },
-        { label: 'Scheduled for', value: time ? formatDateTime(new Date(time)) : "" },
-        { label: 'Duration', value: duration ? `${duration} hours` : "" },
+        { label: 'Begins', value: time ? formatDateTime(new Date(time)) : "" },
+        { label: 'Ends', value: " " },
         { label: 'Total', value: total ? `$ ${total.toLocaleString()}` : "" }
     ].filter(field => field.value);
 
@@ -350,42 +381,98 @@ const Receipt: React.FC<{ receiptData: ReceiptType }> = ({ receiptData }) => {
         animate: { opacity: 1, y: 5 },
     };
 
+    useEffect(() => {
+        console.log("formated", getHourNumber(duration), getHourLabel(duration));
+        console.log("endtime", calculateEndTime(time, duration))
+    }, [duration]);
+
+
+    function calculateEndTime(time: string, duration: number) {
+        if (!time || !duration) return "";
+
+        const durationValue = getHourNumber(duration); // Get the numeric value
+        const durationLabel = getHourLabel(duration); // Get the unit (day(s) or hour(s))
+
+        // Calculate total hours
+        const totalHours = durationLabel.includes('day') ? durationValue * 24 : durationValue;
+
+
+        // Calculate end time
+        const endTime = new Date(new Date(time).getTime() + totalHours * 60 * 60 * 1000);
+        return formatDateTime(endTime);
+    }
+
     return (
         <div className="font-mono">
-            <div className="text-sm bold mt-4 pl-2 mb-1">
+            <div className="text-sm mt-4 pl-2 mb-1 font-normal">
                 Order Summary
             </div>
-            <div className="px-2 py-2 border-t border-gray-200">
+            <Divider />
+            <div className="px-2 py-2">
                 {receiptFields.map((field, index) => (
                     <div key={index} className="w-full font-mono text-xs flex justify-between py-1">
                         <div className="text-left text-gray-500">
                             {field.label}
                         </div>
-                        <AnimatePresence>
-                            <div className="text-right">
-                                {field.value
-                                    ? field.value.split('').map((char, charIndex) => (
-                                        <motion.span
-                                            key={`${field.label}-${charIndex}`}
-                                            initial={{ opacity: 0, y: 20 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            transition={{ duration: 0.15 }}
-                                            exit={{
-                                                opacity: 0,
-                                                y: 100,
-                                                transition: {
-                                                    duration: 0.15,
-                                                },
-                                            }}
-                                            className={`inline-block ${char === ' ' ? 'mr-1' : ' '} ${field.label === "Total" ? 'font-bold' : ' '}`}
-                                        >
-                                            {char}
-                                        </motion.span>
-                                    ))
-                                    : '-'
-                                }
-                            </div>
-                        </AnimatePresence>
+                        <div className="text-right">
+                            <AnimatePresence>
+                                {field.value ? (
+                                    field.label === "Ends" ? (
+                                        calculateEndTime(time, duration).split('').map((char, charIndex) => (
+                                            <motion.span
+                                                key={`${field.label}-${charIndex}`}
+                                                initial={{ opacity: 0, y: 20 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                transition={{ duration: 0.15 }}
+                                                exit={{
+                                                    opacity: 0,
+                                                    y: 5,
+                                                    transition: {
+                                                        duration: 0.08,
+                                                    },
+                                                }}
+                                                className={`inline-block ${char === ' ' ? 'mr-1' : ' '}`}
+                                            >
+                                                {char}
+                                            </motion.span>
+                                        ))
+                                    ) : (
+                                        field.value.split('').map((char, charIndex) => (
+                                            <motion.span
+                                                key={`${field.label}-${charIndex}`}
+                                                initial={{ opacity: 0, y: 20 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                transition={{ duration: 0.15 }}
+                                                exit={{
+                                                    opacity: 0,
+                                                    y: 5,
+                                                    transition: {
+                                                        duration: 0.08,
+                                                    },
+                                                }}
+                                                className={`inline-block ${char === ' ' ? 'mr-1' : ' '} ${field.label === "Total" ? 'font-bold' : ''}`}
+                                            >
+                                                {char}
+                                            </motion.span>
+                                        ))
+                                    )
+                                ) : (
+                                    <motion.span
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{
+                                            opacity: 0,
+                                            y: 100,
+                                            transition: {
+                                                duration: 0.15,
+                                            },
+                                        }}
+                                    >
+                                        -
+                                    </motion.span>
+                                )}
+                            </AnimatePresence>
+                        </div>
                     </div>
                 ))}
             </div>
@@ -394,14 +481,38 @@ const Receipt: React.FC<{ receiptData: ReceiptType }> = ({ receiptData }) => {
     );
 };
 
-import { v4 as uuidv4 } from 'uuid';
+import { Button } from "@nextui-org/react";
+type SubmitFormButtonProps = {
+    onClick?: () => void;
+    disabled?: boolean;
+    orderType: string
+};
+const SubmitFormButton: React.FC<SubmitFormButtonProps> = ({ onClick, disabled, orderType }) => {
+    return (
+        <Button
+            onClick={onClick}
+            color='primary'
+            isDisabled={disabled}
+            endContent={<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="size-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m12.75 15 3-3m0 0-3-3m3 3h-7.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+            </svg>
+            }
+            className="text-sm justify-start px-4 py-1 flex items-center w-18 h-10"
+        >
+            <span className="truncate">{orderType}</span>
+        </Button>
+    );
+};
 
+import { Divider } from "@nextui-org/divider";
+import { v4 as uuidv4 } from 'uuid';
 const PlaceOrderForm: React.FC = () => {
-    const [orderType, setOrderType] = useState<string>(''); // market buy, limit buy, market sell, limit sell
-    const [price, setPrice] = useState<string>('');
-    const [gpus, setGpus] = useState<string>('');
+    const [orderType, setOrderType] = useState<string>('Buy'); // market buy, limit buy, market sell, limit sell
+
     const marketPrice = "4.31" // let's say it's this for now
     const defaultGpuCount = "1"
+    const [price, setPrice] = useState<string>('');
+    const [gpus, setGpus] = useState<string>('');
     const [isFilled, setIsFilled] = useState(false); // coloring the dollar sign
     const [refNumber, _] = useState(uuidv4());
 
@@ -412,29 +523,80 @@ const PlaceOrderForm: React.FC = () => {
     const [startDate, setStartDate] = useState<Date>(initialDate);
     const [duration, setDuration] = useState(25); // Default value
 
-    const total = parseFloat(price) * parseInt(gpus, 10);
+
+    const getHourNumber = (val: number): number => {
+        if (val <= 50) {
+            const hours = 1 + Math.floor((val * 22) / 50);
+            return hours;
+        } else {
+            const days = 1 + Math.floor(((val - 50) * 89) / 50);
+            return days;
+        }
+    };
+
+    const getHourLabel = (val: number): string => {
+        if (val <= 50) {
+            const hours = getHourNumber(val);
+            return hours === 1 ? "hour" : "hours";
+        } else {
+            const days = getHourNumber(val);
+            return days === 1 ? "day" : "days";
+        }
+    };
+
+
+    function durationToHours(duration: number): number {
+        return getHourLabel(duration).includes('day') ? getHourNumber(duration) * 24 : getHourNumber(duration);
+    }
+
+    const total: number = Math.round(parseFloat(price) * parseInt(gpus, 10) * durationToHours(duration) * 100) / 100; // add two dec places
+    useEffect(() => {
+        console.log("total", total);
+    }, [duration]);
+
+
+    const constructReceiptData = (data: typeof receiptData, marketPrice: string) => {
+        return {
+            ...data,
+            price: data.orderType.includes("Market") ? marketPrice : data.price,
+        };
+    };
+
+    //   init data
     const receiptData = {
         startDate,
         duration,
-        refNumber: refNumber, // random for now
         orderType, // taken from RadioGroup
+        refNumber: refNumber, // random for now
         price, // taken from CustomForm
         gpuCount: gpus, // taken from CustomForm
         time: startDate.toLocaleString(), // taken from the CustomForm's DateTimeSlider Component
         total: isNaN(total) ? 0 : total, // Calculate total
     };
 
+    // let's process it to include some conditionals, like having a set marketPrice
+    const processedReceiptData = constructReceiptData(receiptData, marketPrice);
+
     return (
-        <>
+        <div className="flex flex-col space-y-2 w-full min-w-[300px] max-w-[600px] mx-auto">
             <Spacer y={3} />
             <RadioGroup
                 orientation='horizontal'
-                className="max-w-xl w-full text-xxs">
+                defaultValue='Buy'
+                size='sm'
+                className="max-w-xl w-full text-xxs flex flex-nowrap space-x-6"
+            >
                 <CustomRadio value="Buy" onChange={() => setOrderType("Buy")}>
                     Buy
                 </CustomRadio>
-                <CustomRadio description="" value="Sell" onChange={() => setOrderType("Sell")}>
+                <CustomRadio value="Sell" onChange={() => setOrderType("Sell")}>
                     Sell
+                </CustomRadio>
+                <CustomRadio value="Market Buy" onChange={() => setOrderType("Market Buy")}>
+                    Market Buy
+                </CustomRadio>
+                <CustomRadio value="Market Sell" onChange={() => setOrderType("Market Sell")}>
+                    Market Sell
                 </CustomRadio>
                 <Spacer y={4} />
             </RadioGroup>
@@ -451,10 +613,17 @@ const PlaceOrderForm: React.FC = () => {
                 defaultGpuCount={defaultGpuCount}
                 setIsFilled={setIsFilled}
                 isFilled={isFilled}
+                orderType={orderType}
+            // setOrderType={setOrderType}
             />
-            <Receipt receiptData={receiptData} />
-            {/* <Submit /> */}
-        </>
+            <div className="w-full">
+                <Receipt receiptData={processedReceiptData} />
+            </div>
+            <Divider />
+            <div className="text-right relative pt-2 flex justify-end">
+                <SubmitFormButton onClick={() => { console.log("submitted") }} disabled={!total} orderType={orderType} />
+            </div>
+        </div >
     );
 };
 
