@@ -71,6 +71,7 @@ const DateTimeSlider: React.FC<DateTimeSliderProps> = ({ setStartDate, duration,
     // only for days before "today"
     const isDateUnavailable = (date: DateValue): boolean => {
         const todayDate = today(getLocalTimeZone());
+        console.log('today', todayDate)
         return (
             date.compare(todayDate) < 0 // Check if the date is before today
         );
@@ -92,7 +93,7 @@ const DateTimeSlider: React.FC<DateTimeSliderProps> = ({ setStartDate, duration,
 
     return (
         <div className="font-mono max-w-xl w-full space-y-4 text-gray-600">
-            <div className="flex flex-row gap-4  ">
+            <div className="flex flex-row gap-4 text-stone-950  ">
                 <DatePicker
                     label="Start Date"
                     variant="bordered"
@@ -102,10 +103,11 @@ const DateTimeSlider: React.FC<DateTimeSliderProps> = ({ setStartDate, duration,
                     defaultValue={startDateAsDateValue}
                     className="w-full"
                     isDateUnavailable={isDateUnavailable}
+                    errorMessage={"Date must be after today"}
                     onChange={handleDateChange}
                 />
             </div>
-            <div className="flex items-center max-w-xl w-full rounded-lg p-1">
+            <div className="flex items-center max-w-xl w-full rounded-lg">
                 <div className="flex-grow w-full">
                     <Slider
                         step={1}
@@ -252,14 +254,15 @@ const CustomForm: React.FC<{
 
     return (
         <>
+            <Spacer y={1.5} />
             <Input
                 type="number"
                 label="Price"
                 step={0.01}
                 value={price}
                 placeholder={marketPrice}
-                className="font-mono max-w-xl w-full"
-                id="price-input"
+                variant='bordered'
+                id="priceinput"
                 isDisabled={orderType.split(" ")[0] === "Market"}
                 isRequired={orderType.split(" ")[0] === "Buy" || orderType.split(" ")[0] === "Sell"}
                 startContent={
@@ -270,12 +273,12 @@ const CustomForm: React.FC<{
                 endContent={<span className="text-default-400 text-xs">/gpuhr</span>}
                 onChange={handlePriceChange}
                 onKeyDown={(e) => handleKeyPress(e, 'gpus-input', 'price-input', marketPrice)}
-                errorMessage={"Enter a value"}
             />
-            <Spacer y={1.5} />
+            <Spacer y={2} />
             <Input
                 type='number'
                 label="GPUs"
+                variant='bordered'
                 value={gpus}
                 placeholder="1"
                 isRequired
@@ -405,7 +408,11 @@ const Receipt: React.FC<{ receiptData: ReceiptType }> = ({ receiptData }) => {
 
 
     function calculateEndTime(time: string, duration: number) {
-        if (!time || !duration) return "";
+        if (!time || !duration) {
+            const oneHourFromNow = new Date(Math.ceil((Date.now() + 3600 * 1000) / (60 * 60 * 1000)) * (60 * 60 * 1000)); //rounded up to the next hour
+            console.log("oneHourFromNow", oneHourFromNow)
+            return formatDateTime(oneHourFromNow);
+        }
 
         const durationValue = getHourNumber(duration); // Get the numeric value
         const durationLabel = getHourLabel(duration); // Get the unit (day(s) or hour(s))
@@ -514,7 +521,7 @@ const SubmitFormButton: React.FC<SubmitFormButtonProps> = ({ onClick, disabled, 
                 <path stroke-linecap="round" stroke-linejoin="round" d="m12.75 15 3-3m0 0-3-3m3 3h-7.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
             </svg>
             }
-            className="text-sm justify-start px-4 py-1 flex items-center w-18 h-10 hover:scale-105"
+            className="text-sm justify-start px-4 py-1 flex items-center w-18 h-10 hover:scale-105 rounded-md mr-3 mb-4 font-sans"
         >
             <span className="truncate">{orderType}</span>
         </Button>
@@ -524,7 +531,7 @@ const SubmitFormButton: React.FC<SubmitFormButtonProps> = ({ onClick, disabled, 
 import { Divider } from "@nextui-org/divider";
 import { v4 as uuidv4 } from 'uuid';
 const PlaceOrderForm: React.FC = () => {
-    const [orderType, setOrderType] = useState<string>('Buy'); // market buy, limit buy, market sell, limit sell
+    const [orderType, setOrderType] = useState<string>('Market Buy'); // market buy, limit buy, market sell, limit sell
 
     const marketPrice = "4.31" // let's say it's this for now
     const defaultGpuCount = "1"
@@ -567,11 +574,14 @@ const PlaceOrderForm: React.FC = () => {
     }
 
     const total: number = Math.round(parseFloat(price) * parseInt(gpus, 10) * durationToHours(duration) * 100) / 100; // add two dec places
-    // useEffect(() => {
-    //     console.log("pr", price)
-    //     console.log(price, gpus, duration)
-    //     console.log("total", total);
-    // }, [duration]);
+    useEffect(() => {
+        // console.log("pr", price)
+        console.log("gpus", gpus)
+        setGpus(gpus)
+        // console.log(price, gpus, duration)
+        // console.log("total", total);
+
+    }, [duration]);
 
 
     const constructReceiptData = (data: typeof receiptData, marketPrice: string) => {
@@ -597,25 +607,28 @@ const PlaceOrderForm: React.FC = () => {
     const processedReceiptData = constructReceiptData(receiptData, marketPrice);
 
     return (
-        <div className="relative flex flex-col space-y-2 w-full min-w-[300px] max-w-[500px] mx-auto" style={{ minHeight: '43vh' }}>
+        <div
+            className="bg-white p-3 relative flex flex-col space-y-2 w-full min-w-[300px] max-w-[500px] mx-auto rounded-lg"
+            style={{ minHeight: '45vh' }}
+        >
             <Spacer y={3} />
             <RadioGroup
                 orientation='horizontal'
-                defaultValue='Buy'
+                defaultValue='Market Buy'
                 size='sm'
                 className="max-w-xl w-full text-xxs flex flex-nowrap space-x-6 text-gray-600"
             >
-                <CustomRadio value="Buy" onChange={() => setOrderType("Buy")}>
-                    Buy
-                </CustomRadio>
-                <CustomRadio value="Sell" onChange={() => setOrderType("Sell")}>
-                    Sell
-                </CustomRadio>
                 <CustomRadio value="Market Buy" onChange={() => { setOrderType("Market Buy"); setPrice(marketPrice) }}>
                     Market Buy
                 </CustomRadio>
                 <CustomRadio value="Market Sell" onChange={() => { setOrderType("Market Sell"); setPrice(marketPrice) }}>
                     Market Sell
+                </CustomRadio>
+                <CustomRadio value="Buy" onChange={() => setOrderType("Buy")}>
+                    Buy
+                </CustomRadio>
+                <CustomRadio value="Sell" onChange={() => setOrderType("Sell")}>
+                    Sell
                 </CustomRadio>
                 <Spacer y={4} />
             </RadioGroup>
