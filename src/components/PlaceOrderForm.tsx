@@ -91,8 +91,8 @@ const DateTimeSlider: React.FC<DateTimeSliderProps> = ({ setStartDate, duration,
     };
 
     return (
-        <div className="font-mono max-w-xl w-full space-y-4">
-            <div className="flex flex-row gap-4">
+        <div className="font-mono max-w-xl w-full space-y-4 text-gray-600">
+            <div className="flex flex-row gap-4  ">
                 <DatePicker
                     label="Start Date"
                     variant="bordered"
@@ -263,7 +263,7 @@ const CustomForm: React.FC<{
                 isDisabled={orderType.split(" ")[0] === "Market"}
                 isRequired={orderType.split(" ")[0] === "Buy" || orderType.split(" ")[0] === "Sell"}
                 startContent={
-                    <span className={`text-small ${isFilled ? 'text-black' : 'text-default-400'}`}>
+                    <span className={`text-small ${isFilled ? 'text-gray-600' : 'text-default-400'}`}>
                         $
                     </span>
                 }
@@ -510,11 +510,11 @@ const SubmitFormButton: React.FC<SubmitFormButtonProps> = ({ onClick, disabled, 
             onClick={onClick}
             color='primary'
             isDisabled={disabled}
-            endContent={<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="size-6">
+            endContent={<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="size-4">
                 <path stroke-linecap="round" stroke-linejoin="round" d="m12.75 15 3-3m0 0-3-3m3 3h-7.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
             </svg>
             }
-            className="text-sm justify-start px-4 py-1 flex items-center w-18 h-10"
+            className="text-sm justify-start px-4 py-1 flex items-center w-18 h-10 hover:scale-105"
         >
             <span className="truncate">{orderType}</span>
         </Button>
@@ -538,7 +538,7 @@ const PlaceOrderForm: React.FC = () => {
     const initialDate = new Date();
     initialDate.setHours(initialDate.getHours() + 1, 0, 0, 0); // Round to the next hour
     const [startDate, setStartDate] = useState<Date>(initialDate);
-    const [duration, setDuration] = useState(25); // Default value
+    const [duration, setDuration] = useState(250); // Default value
 
 
     const getHourNumber = (val: number): number => {
@@ -568,6 +568,8 @@ const PlaceOrderForm: React.FC = () => {
 
     const total: number = Math.round(parseFloat(price) * parseInt(gpus, 10) * durationToHours(duration) * 100) / 100; // add two dec places
     // useEffect(() => {
+    //     console.log("pr", price)
+    //     console.log(price, gpus, duration)
     //     console.log("total", total);
     // }, [duration]);
 
@@ -595,13 +597,13 @@ const PlaceOrderForm: React.FC = () => {
     const processedReceiptData = constructReceiptData(receiptData, marketPrice);
 
     return (
-        <div className="flex flex-col space-y-2 w-full min-w-[300px] max-w-[600px] mx-auto">
+        <div className="relative flex flex-col space-y-2 w-full min-w-[300px] max-w-[500px] mx-auto" style={{ minHeight: '43vh' }}>
             <Spacer y={3} />
             <RadioGroup
                 orientation='horizontal'
                 defaultValue='Buy'
                 size='sm'
-                className="max-w-xl w-full text-xxs flex flex-nowrap space-x-6"
+                className="max-w-xl w-full text-xxs flex flex-nowrap space-x-6 text-gray-600"
             >
                 <CustomRadio value="Buy" onChange={() => setOrderType("Buy")}>
                     Buy
@@ -609,38 +611,39 @@ const PlaceOrderForm: React.FC = () => {
                 <CustomRadio value="Sell" onChange={() => setOrderType("Sell")}>
                     Sell
                 </CustomRadio>
-                <CustomRadio value="Market Buy" onChange={() => setOrderType("Market Buy")}>
+                <CustomRadio value="Market Buy" onChange={() => { setOrderType("Market Buy"); setPrice(marketPrice) }}>
                     Market Buy
                 </CustomRadio>
-                <CustomRadio value="Market Sell" onChange={() => setOrderType("Market Sell")}>
+                <CustomRadio value="Market Sell" onChange={() => { setOrderType("Market Sell"); setPrice(marketPrice) }}>
                     Market Sell
                 </CustomRadio>
                 <Spacer y={4} />
             </RadioGroup>
             <Spacer y={1.5} />
-            <CustomForm
-                price={price}
-                setPrice={setPrice}
-                gpus={gpus}
-                setGpus={setGpus}
-                setStartDate={setStartDate}
-                duration={duration}
-                setDuration={setDuration}
-                marketPrice={marketPrice}
-                defaultGpuCount={defaultGpuCount}
-                setIsFilled={setIsFilled}
-                isFilled={isFilled}
-                orderType={orderType}
-            // setOrderType={setOrderType}
-            />
-            <div className="w-full">
-                <Receipt receiptData={processedReceiptData} />
+            <div className="flex-grow">
+                <CustomForm
+                    price={price}
+                    setPrice={setPrice}
+                    gpus={gpus}
+                    setGpus={setGpus}
+                    setStartDate={setStartDate}
+                    duration={duration}
+                    setDuration={setDuration}
+                    marketPrice={marketPrice}
+                    defaultGpuCount={defaultGpuCount}
+                    setIsFilled={setIsFilled}
+                    isFilled={isFilled}
+                    orderType={orderType}
+                />
+                <div className="w-full">
+                    <Receipt receiptData={processedReceiptData} />
+                </div>
+                <Divider />
             </div>
-            <Divider />
-            <div className="text-right absolute bottom-0 right-0">
+            <div className="absolute bottom-0 right-0 mb-4">
                 <SubmitFormButton onClick={() => { console.log("submitted") }} disabled={!total} orderType={orderType} />
             </div>
-        </div >
+        </div>
     );
 };
 
