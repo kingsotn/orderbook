@@ -43,18 +43,22 @@ const DateTimeSlider: React.FC<DateTimeSliderProps> = ({ setStartDate, duration,
         setDuration(val);
     };
 
-    const getHourNumber = (val: any) => {
-        if (val <= 50) {
-            const hours = 1 + Math.floor((val * 22) / 50);
+    const getHourNumber = (val: number) => {
+        if (val <= 505) {
+            // Mapping 0 to 500 to 1 to 23 hours
+            // We need to make sure 500 maps to 23 hours correctly
+            const hours = 1 + Math.floor((val / 500) * 22);
             return hours;
         } else {
-            const days = 1 + Math.floor(((val - 50) * 89) / 50);
+            // Mapping 501 to 1000 to 1 to 60 days
+            // We need to make sure 501 maps to 1 day correctly
+            const days = 1 + Math.floor(((val - 501) / 499) * 59);
             return days;
         }
     };
 
-    const getLabel = (val: any) => {
-        if (val <= 50) {
+    const getHourLabel = (val: number) => {
+        if (val <= 505) {
             const hours = getHourNumber(val);
             return hours === 1 ? "hour" : "hours";
         } else {
@@ -101,31 +105,42 @@ const DateTimeSlider: React.FC<DateTimeSliderProps> = ({ setStartDate, duration,
                     onChange={handleDateChange}
                 />
             </div>
-            <div className="flex items-center space-x-4 max-w-xl w-full border border-gray-200 rounded-lg p-1">
-                <div className="flex-grow max-w-xs w-full">
+            <div className="flex items-center max-w-xl w-full rounded-lg p-1">
+                <div className="flex-grow w-full">
                     <Slider
                         step={1}
+                        minValue={0}
+                        maxValue={1000}
                         value={duration}
                         color={'foreground'}
-                        size="sm"
-                        minValue={1}
+                        size="lg"
                         onChange={handleChange}
                         aria-label="Duration slider"
                         classNames={{
                             base: "w-full",
-                            track: "bg-gray-300 h-0.5 rounded-full",
-                            thumb: [
-                                "block h-5 w-5 rounded-full border border-1 border-gray-400 bg-gray-50 shadow cursor-default",
-                                "hover:bg-gray-300 hover:border-gray-600",
-                                "transform hover:scale-110 transition active:scale-100",
-                            ]
+                            track: "bg-gray-300 h-0.5 rounded-full color-white",
+                            filler: "bg-gray-600"
                         }}
+                        renderThumb={(props) => (
+                            <div
+                                {...props}
+                                className="group top-1/2 bg-background rounded-full cursor-default data-[dragging=true]:cursor-default"
+                            >
+                                <span
+                                    className={[
+                                        "block h-5 w-5 rounded-full border border-gray-600 bg-gray-50 shadow cursor-pointer",
+                                        "hover:bg-gray-300 hover:border-gray-600 hover:scale-110 hover:cursor-default",
+                                        "transition-transform duration-200 ease-in-out",
+                                        "group-data-[dragging=true]:bg-gray-300 group-data-[dragging=true]:border-gray-600 group-data-[dragging=true]:scale-110"
+                                    ].join(" ")}
+                                />
+                            </div>
+                        )}
                     />
                 </div>
-                <div className="flex justify-end">
-                    <div className="text-right w-[93px] px-4 py-1 text-gray-600 rounded-r-lg border-l items-center font-mono text-xs flex justify-center bg-gray-200 select-none">
-                        <span>{getHourNumber(duration)} {getLabel(duration)}</span>
-                    </div>
+                <div className="flex-shrink-0 w-[74px] px-2 py-1 text-gray-600 rounded-r-lg border-l font-mono text-xs flex items-center bg-gray-200 select-none overflow-hidden">
+                    <span className="text-center mx-auto">{getHourNumber(duration)}</span>
+                    <span className='ml-auto'>{getHourLabel(duration)}</span>
                 </div>
             </div>
         </div>
@@ -162,7 +177,9 @@ const CustomForm: React.FC<{
         const value = e.target.value;
         const intValue = parseInt(value, 10);
         if ((intValue >= 1 && intValue <= 512) || value === '') {
-            setGpus(value);
+            setGpus(intValue.toString());
+        } else if (intValue > 512) {
+            setGpus('512');
         }
     };
 
@@ -257,7 +274,7 @@ const CustomForm: React.FC<{
             />
             <Spacer y={1.5} />
             <Input
-                type="number"
+                type='number'
                 label="GPUs"
                 value={gpus}
                 placeholder="1"
@@ -302,9 +319,9 @@ const Receipt: React.FC<{ receiptData: ReceiptType }> = ({ receiptData }) => {
         duration,
     } = receiptData;
 
-    useEffect(() => {
-        console.log("orderType", orderType);
-    }, [orderType]);
+    // useEffect(() => {
+    //     console.log("orderType", orderType);
+    // }, [orderType]);
 
     const formatDateTime = (date: Date): string => {
         const options: Intl.DateTimeFormatOptions = {
@@ -334,28 +351,28 @@ const Receipt: React.FC<{ receiptData: ReceiptType }> = ({ receiptData }) => {
 
     const calculateEndDate = (start: Date, duration: number): Date => {
         const startDateCopy = new Date(start);
-        if (duration <= 50) {
-            const hours = 1 + Math.floor((duration * 22) / 50);
+        if (duration <= 500) {
+            const hours = 1 + Math.floor((duration * 22) / 500);
             startDateCopy.setHours(startDateCopy.getHours() + hours);
         } else {
-            const days = 1 + Math.floor(((duration - 50) * 30) / 50);
+            const days = 1 + Math.floor(((duration - 500) * 30) / 500);
             startDateCopy.setDate(startDateCopy.getDate() + days);
         }
         return startDateCopy;
     };
 
     const getHourNumber = (val: number): number => {
-        if (val <= 50) {
-            const hours = 1 + Math.floor((val * 22) / 50);
+        if (val <= 505) {
+            const hours = 1 + Math.floor((val * 22) / 500);
             return hours;
         } else {
-            const days = 1 + Math.floor(((val - 50) * 89) / 50);
+            const days = 1 + Math.floor(((val - 500) * 89) / 500);
             return days;
         }
     };
 
     const getHourLabel = (val: number): string => {
-        if (val <= 50) {
+        if (val <= 505) {
             const hours = getHourNumber(val);
             return hours === 1 ? "hour" : "hours";
         } else {
@@ -381,10 +398,10 @@ const Receipt: React.FC<{ receiptData: ReceiptType }> = ({ receiptData }) => {
         animate: { opacity: 1, y: 5 },
     };
 
-    useEffect(() => {
-        console.log("formated", getHourNumber(duration), getHourLabel(duration));
-        console.log("endtime", calculateEndTime(time, duration))
-    }, [duration]);
+    // useEffect(() => {
+    //     console.log("formated", getHourNumber(duration), getHourLabel(duration));
+    //     console.log("endtime", calculateEndTime(time, duration))
+    // }, [duration]);
 
 
     function calculateEndTime(time: string, duration: number) {
@@ -525,17 +542,17 @@ const PlaceOrderForm: React.FC = () => {
 
 
     const getHourNumber = (val: number): number => {
-        if (val <= 50) {
-            const hours = 1 + Math.floor((val * 22) / 50);
+        if (val <= 500) {
+            const hours = 1 + Math.floor((val * 22) / 500);
             return hours;
         } else {
-            const days = 1 + Math.floor(((val - 50) * 89) / 50);
+            const days = 1 + Math.floor(((val - 500) * 89) / 500);
             return days;
         }
     };
 
     const getHourLabel = (val: number): string => {
-        if (val <= 50) {
+        if (val <= 500) {
             const hours = getHourNumber(val);
             return hours === 1 ? "hour" : "hours";
         } else {
@@ -550,9 +567,9 @@ const PlaceOrderForm: React.FC = () => {
     }
 
     const total: number = Math.round(parseFloat(price) * parseInt(gpus, 10) * durationToHours(duration) * 100) / 100; // add two dec places
-    useEffect(() => {
-        console.log("total", total);
-    }, [duration]);
+    // useEffect(() => {
+    //     console.log("total", total);
+    // }, [duration]);
 
 
     const constructReceiptData = (data: typeof receiptData, marketPrice: string) => {
@@ -620,7 +637,7 @@ const PlaceOrderForm: React.FC = () => {
                 <Receipt receiptData={processedReceiptData} />
             </div>
             <Divider />
-            <div className="text-right relative pt-2 flex justify-end">
+            <div className="text-right absolute bottom-0 right-0">
                 <SubmitFormButton onClick={() => { console.log("submitted") }} disabled={!total} orderType={orderType} />
             </div>
         </div >
