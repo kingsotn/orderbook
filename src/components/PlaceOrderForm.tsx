@@ -299,9 +299,14 @@ interface ReceiptType {
     duration: number;
 }
 
+interface ReceiptProps {
+    receiptData: ReceiptType;
+    setEndTime: React.Dispatch<React.SetStateAction<string>>
+}
+
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import { AnimatePresence, motion } from "framer-motion"
-const Receipt: React.FC<{ receiptData: ReceiptType }> = ({ receiptData }) => {
+const Receipt: React.FC<ReceiptProps> = ({ receiptData, setEndTime }) => {
     const {
         refNumber,
         orderType,
@@ -342,19 +347,6 @@ const Receipt: React.FC<{ receiptData: ReceiptType }> = ({ receiptData }) => {
         return formattedString;
     };
 
-
-    const calculateEndDate = (start: Date, duration: number): Date => {
-        const startDateCopy = new Date(start);
-        if (duration <= 500) {
-            const hours = 1 + Math.floor((duration * 22) / 500);
-            startDateCopy.setHours(startDateCopy.getHours() + hours);
-        } else {
-            const days = 1 + Math.floor(((duration - 500) * 30) / 500);
-            startDateCopy.setDate(startDateCopy.getDate() + days);
-        }
-        return startDateCopy;
-    };
-
     const getHourNumber = (val: number): number => {
         if (val <= 505) {
             const hours = 1 + Math.floor((val * 22) / 500);
@@ -375,7 +367,6 @@ const Receipt: React.FC<{ receiptData: ReceiptType }> = ({ receiptData }) => {
         }
     };
 
-    const endDate = calculateEndDate(startDate, duration);
 
     const receiptFields = [
         { label: 'Ref Number', value: refNumber },
@@ -402,6 +393,7 @@ const Receipt: React.FC<{ receiptData: ReceiptType }> = ({ receiptData }) => {
         if (!time || !duration) {
             const oneHourFromNow = new Date(Math.ceil((Date.now() + 3600 * 1000) / (60 * 60 * 1000)) * (60 * 60 * 1000)); //rounded up to the next hour
             console.log("oneHourFromNow", oneHourFromNow)
+            setEndTime(formatDateTime(oneHourFromNow))
             return formatDateTime(oneHourFromNow);
         }
 
@@ -414,6 +406,7 @@ const Receipt: React.FC<{ receiptData: ReceiptType }> = ({ receiptData }) => {
 
         // Calculate end time
         const endTime = new Date(new Date(time).getTime() + totalHours * 60 * 60 * 1000);
+        setEndTime(formatDateTime(endTime))
         return formatDateTime(endTime);
     }
 
@@ -454,7 +447,7 @@ const Receipt: React.FC<{ receiptData: ReceiptType }> = ({ receiptData }) => {
                                             </motion.span>
                                         ))
                                     ) : (
-                                        field.value.split('').map((char, charIndex) => (
+                                        field.value.split('').map((char: any, charIndex: any) => (
                                             <motion.span
                                                 key={`${field.label}-${charIndex}`}
                                                 initial={{ opacity: 0, y: 20 }}
@@ -531,6 +524,8 @@ const PlaceOrderForm: React.FC = () => {
     const [gpus, setGpus] = useState<string>('');
     const [isFilled, setIsFilled] = useState(false); // coloring the dollar sign
     const [refNumber, _] = useState("53347e23-6f48-4fed-8cae-5e18b3662771");
+    const [endTime, setEndTime] = useState<string>("");
+
 
 
     // date stuff
@@ -569,7 +564,7 @@ const PlaceOrderForm: React.FC = () => {
 
 
     const totalString: string = (parseFloat(price) * parseInt(gpus, 10) * durationToHours(duration)).toFixed(2); // add two dec places
-    const total: number = Number(totalString)
+    const total: number = Number(totalString) * 100 / 100;
     useEffect(() => {
         console.log("pr", price)
         console.log("gpus", gpus)
@@ -584,12 +579,7 @@ const PlaceOrderForm: React.FC = () => {
     }, [duration]);
 
 
-    const constructReceiptData = (data: typeof receiptData, marketPrice: string) => {
-        return {
-            ...data,
-            price: data.orderType.includes("Market") ? marketPrice : data.price,
-        };
-    };
+
 
     //   init data
     const receiptData = {
@@ -603,15 +593,27 @@ const PlaceOrderForm: React.FC = () => {
         total: isNaN(total) ? 0 : total, // Calculate total
     };
 
+    // dunno why i made this, need to aggressively refactor
+    const constructReceiptData = (data: typeof receiptData, marketPrice: string) => {
+        return {
+            ...data,
+            endTime: endTime,
+            price: data.orderType.includes("Market") ? marketPrice : data.price,
+        };
+    };
+
     // let's process it to include some conditionals, like having a set marketPrice
     const processedReceiptData = constructReceiptData(receiptData, marketPrice);
 
+    // submit form
     const handleSubmitForm = () => {
         console.log("submitted");
 
         const formattedReceiptData = Object.entries(processedReceiptData)
+            .filter(([key, _]) => key !== 'duration') // Exclude the 'duration' key
             .map(([key, value]) => `${key}: ${value}`)
             .join('\n');
+
         console.log(formattedReceiptData);
     };
 
@@ -658,7 +660,7 @@ const PlaceOrderForm: React.FC = () => {
                     orderType={orderType}
                 />
                 <div className="w-full">
-                    <Receipt receiptData={processedReceiptData} />
+                    <Receipt receiptData={processedReceiptData} setEndTime={setEndTime} />
                 </div>
                 <Divider />
             </div>
