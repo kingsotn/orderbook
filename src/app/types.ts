@@ -13,8 +13,3 @@ export interface BidAsk {
     start: Date;
     end: Date;
 }
-
-export interface OrderBook {
-    bids: BidAsk[];
-    asks: BidAsk[];
-}

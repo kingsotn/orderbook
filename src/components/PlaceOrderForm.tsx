@@ -518,7 +518,7 @@ import { v4 as uuidv4 } from 'uuid';
 const PlaceOrderForm: React.FC = () => {
     const [orderType, setOrderType] = useState<string>('Market Buy'); // market buy, limit buy, market sell, limit sell
 
-    const marketPrice = "4.31" // let's say it's this for now
+    const marketPrice = "2.85" // let's say it's this for now
     const defaultGpuCount = "1"
     const [price, setPrice] = useState<string>('');
     const [gpus, setGpus] = useState<string>('');
@@ -606,7 +606,7 @@ const PlaceOrderForm: React.FC = () => {
     const processedReceiptData = constructReceiptData(receiptData, marketPrice);
 
     // submit form
-    const handleSubmitForm = () => {
+    const handleSubmitForm = async () => {
         console.log("submitted");
 
         const formattedReceiptData = Object.entries(processedReceiptData)
@@ -615,6 +615,26 @@ const PlaceOrderForm: React.FC = () => {
             .join('\n');
 
         console.log(formattedReceiptData);
+
+        // submit to a post to api/order
+        try {
+            const response = await fetch('api/order', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ receiptData: formattedReceiptData })
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            console.log('Success:', result);
+        } catch (error) {
+            console.error('Error:', error);
+        }
     };
 
     return (

@@ -3,6 +3,7 @@ import OrderBookComponent from "@/components/OrderBook";
 import RecentTransactions from "@/components/RecentTransactions";
 import PlaceOrderForm from "@/components/PlaceOrderForm";
 import { NextUIProvider } from "@nextui-org/react";
+import OrderBook from "@/components/OrderBook";
 
 
 export default function Home() {
@@ -10,7 +11,7 @@ export default function Home() {
     <NextUIProvider>
       <main className="flex flex-col p-24 text-stone-950">
         <PlaceOrderForm />
-        {/* <OrderBook /> */}
+        <OrderBook />
 
         {/* <div className="min-h-screen bg-gray-100 p-4"> */}
         {/* <h1 className="text-2xl font-bold mb-4 font-color">Dashboard</h1>
