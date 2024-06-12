@@ -91,6 +91,7 @@ const DateTimeSlider: React.FC<DateTimeSliderProps> = ({ setStartDate, duration,
         console.log("Selected date:", convertedDate);
     };
 
+
     return (
         <div className="font-mono max-w-xl w-full space-y-4 text-gray-600">
             <div className="flex flex-row gap-4 text-stone-950  ">
@@ -195,17 +196,6 @@ const CustomForm: React.FC<{
         const { key, shiftKey, currentTarget } = e;
         const currentId = currentTarget.id;
 
-        const setPlaceholderIfEmpty = () => {
-            if (currentTarget.value === '') {
-                currentTarget.value = placeholderValue;
-                if (currentId === 'price-input') {
-                    setPrice(placeholderValue);
-                } else if (currentId === 'gpus-input') {
-                    setGpus(placeholderValue);
-                }
-            }
-        };
-
         if ((e.key === 'Enter' || e.key === 'Tab') && e.currentTarget.value === "") {
             if (e.currentTarget.id === 'price-input') {
                 e.currentTarget.value = marketPrice;
@@ -266,13 +256,14 @@ const CustomForm: React.FC<{
                 isDisabled={orderType.split(" ")[0] === "Market"}
                 isRequired={orderType.split(" ")[0] === "Buy" || orderType.split(" ")[0] === "Sell"}
                 startContent={
-                    <span className={`text-small ${isFilled ? 'text-gray-600' : 'text-default-400'}`}>
+                    <span className={`text-small ${isFilled ? 'text-gray-600' : 'text-default-300'}`}>
                         $
                     </span>
                 }
                 endContent={<span className="text-default-400 text-xs">/gpuhr</span>}
                 onChange={handlePriceChange}
                 onKeyDown={(e) => handleKeyPress(e, 'gpus-input', 'price-input', marketPrice)}
+                className="font-mono placeholder:text-gray-200"
             />
             <Spacer y={2} />
             <Input
@@ -282,7 +273,7 @@ const CustomForm: React.FC<{
                 value={gpus}
                 placeholder="1"
                 isRequired
-                className="font-mono max-w-xl w-full"
+                className="font-mono max-w-xl w-full placeholder:text-gray-200"
                 id="gpus-input"
                 endContent={<span className="text-default-400 text-xs">amount</span>}
                 onChange={handleGpusChange}
@@ -426,20 +417,22 @@ const Receipt: React.FC<{ receiptData: ReceiptType }> = ({ receiptData }) => {
         return formatDateTime(endTime);
     }
 
+
+
     return (
-        <div className="font-mono">
-            <div className="text-sm mt-4 pl-2 mb-1 font-normal">
-                Order Summary
-            </div>
-            <Divider />
-            <div className="px-2 py-2">
-                {receiptFields.map((field, index) => (
-                    <div key={index} className="w-full font-mono text-xs flex justify-between py-1">
-                        <div className="text-left text-gray-500">
-                            {field.label}
-                        </div>
-                        <div className="text-right">
-                            <AnimatePresence>
+        <AnimatePresence>
+            <div className="font-mono">
+                <div className="text-sm mt-4 pl-2 mb-1 font-normal">
+                    Order Summary
+                </div>
+                <Divider />
+                <div className="px-2 py-2">
+                    {receiptFields.map((field, index) => (
+                        <div key={index} className="w-full font-mono text-xs flex justify-between py-1">
+                            <div className="text-left text-gray-500">
+                                {field.label}
+                            </div>
+                            <div className="text-right">
                                 {field.value ? (
                                     field.label === "Ends" ? (
                                         calculateEndTime(time, duration).split('').map((char, charIndex) => (
@@ -495,13 +488,12 @@ const Receipt: React.FC<{ receiptData: ReceiptType }> = ({ receiptData }) => {
                                         -
                                     </motion.span>
                                 )}
-                            </AnimatePresence>
+                            </div>
                         </div>
-                    </div>
-                ))}
+                    ))}
+                </div>
             </div>
-        </div>
-
+        </AnimatePresence>
     );
 };
 
@@ -517,8 +509,8 @@ const SubmitFormButton: React.FC<SubmitFormButtonProps> = ({ onClick, disabled, 
             onClick={onClick}
             color='primary'
             isDisabled={disabled}
-            endContent={<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="size-4">
-                <path stroke-linecap="round" stroke-linejoin="round" d="m12.75 15 3-3m0 0-3-3m3 3h-7.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+            endContent={<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-4">
+                <path strokeLinecap="round" strokeLinejoin="round" d="m12.75 15 3-3m0 0-3-3m3 3h-7.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
             </svg>
             }
             className="text-sm justify-start px-4 py-1 flex items-center w-18 h-10 hover:scale-105 rounded-md mr-3 mb-4 font-sans"
@@ -538,7 +530,7 @@ const PlaceOrderForm: React.FC = () => {
     const [price, setPrice] = useState<string>('');
     const [gpus, setGpus] = useState<string>('');
     const [isFilled, setIsFilled] = useState(false); // coloring the dollar sign
-    const [refNumber, _] = useState(uuidv4());
+    const [refNumber, _] = useState("53347e23-6f48-4fed-8cae-5e18b3662771");
 
 
     // date stuff
@@ -573,13 +565,21 @@ const PlaceOrderForm: React.FC = () => {
         return getHourLabel(duration).includes('day') ? getHourNumber(duration) * 24 : getHourNumber(duration);
     }
 
-    const total: number = Math.round(parseFloat(price) * parseInt(gpus, 10) * durationToHours(duration) * 100) / 100; // add two dec places
+
+
+
+    const totalString: string = (parseFloat(price) * parseInt(gpus, 10) * durationToHours(duration)).toFixed(2); // add two dec places
+    const total: number = Number(totalString)
     useEffect(() => {
-        // console.log("pr", price)
+        console.log("pr", price)
         console.log("gpus", gpus)
-        setGpus(gpus)
+        console.log("duration", duration)
+        // setGpus(gpus)
         // console.log(price, gpus, duration)
-        // console.log("total", total);
+        console.log("total", total);
+
+        // set marketPrice
+        if (orderType === "Market Buy" || orderType === "Market Sell") setPrice(marketPrice);
 
     }, [duration]);
 
@@ -593,12 +593,12 @@ const PlaceOrderForm: React.FC = () => {
 
     //   init data
     const receiptData = {
-        startDate,
-        duration,
-        orderType, // taken from RadioGroup
         refNumber: refNumber, // random for now
+        orderType, // taken from RadioGroup
         price, // taken from CustomForm
         gpuCount: gpus, // taken from CustomForm
+        startDate,
+        duration,
         time: startDate.toLocaleString(), // taken from the CustomForm's DateTimeSlider Component
         total: isNaN(total) ? 0 : total, // Calculate total
     };
@@ -606,10 +606,19 @@ const PlaceOrderForm: React.FC = () => {
     // let's process it to include some conditionals, like having a set marketPrice
     const processedReceiptData = constructReceiptData(receiptData, marketPrice);
 
+    const handleSubmitForm = () => {
+        console.log("submitted");
+
+        const formattedReceiptData = Object.entries(processedReceiptData)
+            .map(([key, value]) => `${key}: ${value}`)
+            .join('\n');
+        console.log(formattedReceiptData);
+    };
+
     return (
         <div
-            className="bg-white p-3 relative flex flex-col space-y-2 w-full min-w-[300px] max-w-[500px] mx-auto rounded-lg"
-            style={{ minHeight: '45vh' }}
+            className="bg-white p-3 relative flex flex-col space-y-2 w-full min-w-[500px] max-w-[500px] mx-auto rounded-lg border-3 border-gray-400"
+            style={{ minHeight: '508px' }}
         >
             <Spacer y={3} />
             <RadioGroup
@@ -653,8 +662,8 @@ const PlaceOrderForm: React.FC = () => {
                 </div>
                 <Divider />
             </div>
-            <div className="absolute bottom-0 right-0 mb-4">
-                <SubmitFormButton onClick={() => { console.log("submitted") }} disabled={!total} orderType={orderType} />
+            <div className="relative bottom-0 right-0 mb-4 pt-8 text-right flex justify-end mx-1">
+                <SubmitFormButton onClick={handleSubmitForm} disabled={!total} orderType={orderType} />
             </div>
         </div>
     );
