@@ -611,6 +611,7 @@ const PlaceOrderForm: React.FC = () => {
 
         const formattedReceiptData = Object.entries(processedReceiptData)
             .filter(([key, _]) => key !== 'duration') // Exclude the 'duration' key
+            .filter(([key, _]) => key !== 'startDate') // Exclude the 'duration' key
             .map(([key, value]) => `${key}: ${value}`)
             .join('\n');
 

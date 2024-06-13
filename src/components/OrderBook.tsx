@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from 'react';
+import * as React from "react"
 import { Tabs, Tab } from "@nextui-org/react";
 // import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell } from "@nextui-org/react";
 import {
@@ -11,6 +12,27 @@ import {
     TableHeader,
     TableRow,
 } from "./shadui"
+import { ColumnDef } from "@tanstack/react-table"
+import { DataTable } from './data-table';
+import { processedMockData } from './mock_data';
+import { Button } from '@nextui-org/react';
+
+const UpDownSVG = () => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="12"
+        height="12"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="#000000"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+    >
+        <path d="M7 15l5 5 5-5" />
+        <path d="M7 9l5-5 5 5" />
+    </svg>
+);
 
 
 interface ReceiptData {
@@ -22,8 +44,140 @@ interface ReceiptData {
     total: string;
     startDate: string;
     endTime: string;
-    // Add other fields as needed
 }
+
+export const columns: ColumnDef<ReceiptData>[] = [
+    {
+        accessorKey: "price",
+        header: ({ column }) => {
+            const isSorted = column.getIsSorted();
+            return (
+                < Button
+                    variant='flat'
+                    size="sm"
+                    fullWidth
+                    endContent={< UpDownSVG />}
+                    disableAnimation
+                    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                    className={`border-none bg-white ${isSorted ? 'font-semibold' : ''}`}
+                >
+                    $ / gpuhr
+                </Button>
+            )
+        },
+        cell: ({ row, column }) => {
+            const price = parseFloat(row.getValue("price"))
+            const isSorted = column.getIsSorted();
+            const orderType = row.getValue("orderType");
+            return <div className="">{price}</div>;
+        },
+    },
+    {
+        accessorKey: "gpuCount",
+        header: ({ column }) => {
+            const isSorted = column.getIsSorted();
+            return (
+                <Button
+                    variant='flat'
+                    size="sm"
+                    fullWidth
+                    endContent={< UpDownSVG />}
+                    disableAnimation
+                    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")
+                    }
+                    className={`border-none bg-white ${isSorted ? 'font-semibold' : ''}`}
+
+                >
+                    GPUs
+                </Button>
+            )
+        },
+        cell: ({ row, column }) => {
+            const gpuCount = parseFloat(row.getValue("gpuCount"))
+            const isSorted = column.getIsSorted();
+            const orderType = row.getValue("orderType");
+            return <div className="">{gpuCount}</div>;
+        },
+    },
+    {
+        accessorKey: "range",
+        header: ({ column }) => {
+            const isSorted = column.getIsSorted();
+            return (
+                <Button
+                    variant='flat'
+                    size="sm"
+                    fullWidth
+                    endContent={< UpDownSVG />}
+                    disableAnimation
+                    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")
+                    }
+                    className={`border-none bg-white ${isSorted ? 'font-semibold' : ''}`}
+                >
+                    Range
+                </Button >
+            )
+        },
+        cell: ({ row, column }) => {
+            const range: string = row.getValue("range")
+            const isSorted = column.getIsSorted();
+            return <div className="">{range}</div>;
+        },
+    },
+    {
+        accessorKey: "hours",
+        header: ({ column }) => {
+            const isSorted = column.getIsSorted();
+            return (
+                <Button
+                    variant='flat'
+                    size="sm"
+                    fullWidth
+                    endContent={< UpDownSVG />}
+                    disableAnimation
+                    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")
+                    }
+                    className={`border-none bg-white ${isSorted ? 'font-semibold' : ''}`}
+
+                >
+                    Hours
+                </Button >
+            )
+        },
+        cell: ({ row, column }) => {
+            const hours = parseFloat(row.getValue("hours"))
+            const isSorted = column.getIsSorted();
+            return <div className="">{hours}</div>;
+        },
+    },
+    {
+        accessorKey: "total",
+        header: ({ column }) => {
+            const isSorted = column.getIsSorted();
+
+            return (
+                <Button
+                    variant='flat'
+                    size="sm"
+                    fullWidth
+                    endContent={<UpDownSVG />}
+                    disableAnimation
+                    onClick={() => column.toggleSorting(isSorted === "asc")}
+                    className={`border-none bg-white ${isSorted ? 'font-semibold' : ''}`}
+                >
+                    Total ($)
+                </Button>
+            )
+        },
+        cell: ({ row, column }) => {
+            const total = parseFloat(row.getValue("total")).toFixed(2);
+            return <div className="">{total}</div>;
+        },
+    }
+];
+
+
+
 
 const parseReceiptData = (rawData: string): ReceiptData => {
     const lines = rawData.split('\n');
@@ -45,6 +199,7 @@ const OrderBook: React.FC = () => {
                 const response = await fetch('/api/order');
                 const data = await response.json();
                 const parsedData = data.data.map((rawData: string) => parseReceiptData(rawData));
+                // parsedData.map((e: any) => console.log(e.value, typeof (e)))
                 setReceiptData(parsedData);
                 setLoading(false);
             } catch (error) {
@@ -60,99 +215,33 @@ const OrderBook: React.FC = () => {
         return <div>Loading...</div>;
     }
 
-    const mockData = [
-        {
-            price: "$3.33",
-            gpus: "20",
-            range: "6/1 —> 6/5",
-            total: "$3,124",
-        },
-        {
-            price: "$4.12",
-            gpus: "150",
-            range: "7/10 —> 7/30",
-            total: "$12,300",
-        },
-        {
-            price: "$3.78",
-            gpus: "320",
-            range: "5/15 —> 5/25",
-            total: "$8,450",
-        },
-        {
-            price: "$2.95",
-            gpus: "80",
-            range: "4/1 —> 4/20",
-            total: "$5,250",
-        },
-        {
-            price: "$3.22",
-            gpus: "220",
-            range: "6/10 —> 6/20",
-            total: "$7,125",
-        },
-        {
-            price: "$4.00",
-            gpus: "512",
-            range: "7/5 —> 7/25",
-            total: "$20,480",
-        },
-        {
-            price: "$3.50",
-            gpus: "45",
-            range: "8/1 —> 8/10",
-            total: "$1,575",
-        },
-        {
-            price: "$2.88",
-            gpus: "30",
-            range: "5/25 —> 6/4",
-            total: "$864",
-        },
-    ]
+    function formatDateRange(start: string, end: string): string {
+        const formatDate = (date: string): string => {
+            const options: Intl.DateTimeFormatOptions = { month: '2-digit', day: '2-digit' };
+            return new Date(date).toLocaleString('en-US', options);
+        };
+
+        const startDate = new Date(start);
+        const endDate = new Date(end);
+
+        if (startDate.toLocaleDateString() === endDate.toLocaleDateString()) {
+            return `${formatDate(start)}`;
+        }
+
+        return `${formatDate(start)} → ${formatDate(end)}`;
+    }
+
+    function hoursBetween(start: string, end: string): number {
+        const startDate = new Date(start);
+        const endDate = new Date(end);
+        const diffInMilliseconds = endDate.getTime() - startDate.getTime();
+        return diffInMilliseconds / (1000 * 60 * 60);
+    }
+
 
     return (
-        <div
-            className="font-mono bg-white p-3 relative flex flex-col space-y-2 w-full min-w-[500px] max-w-[500px] mx-auto rounded-lg border-3 border-gray-400"
-        >
-            <Tabs aria-label="Options">
-                <Tab key="orderbook" title="Order Book">
-                    <Table className="table-newyork">
-                        <TableCaption>A list of your recent invoices.</TableCaption>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead className="w-[100px]">$/gpuhr</TableHead>
-                                <TableHead>gpus</TableHead>
-                                <TableHead>range</TableHead>
-                                <TableHead className="text-right">total</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {mockData.map((data) => (
-                                <TableRow key={data.price}>
-                                    <TableCell className="font-medium">{data.price}</TableCell>
-                                    <TableCell>{data.gpus}</TableCell>  g
-                                    <TableCell>{data.range}</TableCell>
-                                    <TableCell className="text-right">{data.total}</TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </Tab>
-                <Tab key="tradehistory" title="Trade History">
-                </Tab>
-            </Tabs>
-            {receiptData.length === 0 ? (
-                <p>No receipt data available.</p>
-            ) : (
-                <ul>
-                    {receiptData.map((receipt, index) => (
-                        <li key={index}>
-                            <pre>{JSON.stringify(receipt, null, 2)}</pre>
-                        </li>
-                    ))}
-                </ul>
-            )}
+        <div className="max-w-[500px] flex flex-col justify-center">
+            <DataTable columns={columns} data={processedMockData} />
         </div>
     );
 };
