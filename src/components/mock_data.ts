@@ -131,13 +131,13 @@ const mockData = [
     },
     {
         refNumber: "marketPriceRow",
-        orderType: " ",
+        orderType: "0",
         price: "2.85",
         gpuCount: "0",
-        startDate: " ",
-        time: " ",
+        startDate: "0",
+        time: "0",
         total: "0",
-        endTime: " "
+        endTime: "0"
     },
 ];
 
@@ -147,11 +147,14 @@ function formatDateRange(start: string, end: string): string {
         return new Date(date).toLocaleString('en-US', options);
     };
 
+    if (start == "0" || end == "0") return " " // marketPrice row case
+
     const startDate = new Date(start);
     const endDate = new Date(end);
 
+
     if (startDate.toLocaleDateString() === endDate.toLocaleDateString()) {
-        return `${formatDate(start)}`;
+        return `${formatDate(start)} → `;
     }
 
     return `${formatDate(start)} → ${formatDate(end)}`;

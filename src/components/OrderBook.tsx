@@ -46,6 +46,7 @@ interface ReceiptData {
     endTime: string;
 }
 
+// column definitions for the orderbook
 export const columns: ColumnDef<ReceiptData>[] = [
     {
         accessorKey: "price",
@@ -67,7 +68,7 @@ export const columns: ColumnDef<ReceiptData>[] = [
         },
         cell: ({ row, column }) => {
             const price = parseFloat(row.getValue("price"));
-            return <div className="">{price}</div>;
+            return <div className="flex justify-left pl-6">{price.toFixed(2)}</div>;
         },
     },
     {
@@ -92,7 +93,7 @@ export const columns: ColumnDef<ReceiptData>[] = [
         },
         cell: ({ row, column }) => {
             const gpuCount = parseFloat(row.getValue("gpuCount"))
-            return <div className="">{gpuCount}</div>;
+            return <div className="flex justify-left pl-4">{gpuCount}</div>;
         },
     },
     {
@@ -116,8 +117,7 @@ export const columns: ColumnDef<ReceiptData>[] = [
         },
         cell: ({ row, column }) => {
             const range: string = row.getValue("range")
-            const isSorted = column.getIsSorted();
-            return <div className="">{range}</div>;
+            return <div className="flex justify-left">{range}</div>;
         },
     },
     {
@@ -142,7 +142,7 @@ export const columns: ColumnDef<ReceiptData>[] = [
         },
         cell: ({ row, column }) => {
             const hours = parseFloat(row.getValue("hours"))
-            return <div className="">{hours}</div>;
+            return hours > 0 ? <div className="flex justify-end mr-6">{hours}</div> : <div className="flex justify-end mr-6"></div>; // don't render anything if hours ==0
         },
     },
     {
@@ -166,74 +166,12 @@ export const columns: ColumnDef<ReceiptData>[] = [
         },
         cell: ({ row, column }) => {
             const total = parseFloat(row.getValue("total")).toFixed(2);
-            return <div className="">{total}</div>;
+            return <div className="flex justify-end mr-6">{total}</div>;
         },
     }
 ];
 
-
-
-
-const parseReceiptData = (rawData: string): ReceiptData => {
-    const lines = rawData.split('\n');
-    const data: any = {};
-    lines.forEach(line => {
-        const [key, ...rest] = line.split(': ');
-        data[key] = rest.join(': ');
-    });
-    return data as ReceiptData;
-};
-
 const OrderBook: React.FC = () => {
-    const [receiptData, setReceiptData] = useState<ReceiptData[]>([]);
-    const [loading, setLoading] = useState<boolean>(true);
-
-    useEffect(() => {
-        const fetchReceiptData = async () => {
-            try {
-                const response = await fetch('/api/order');
-                const data = await response.json();
-                const parsedData = data.data.map((rawData: string) => parseReceiptData(rawData));
-                // parsedData.map((e: any) => console.log(e.value, typeof (e)))
-                setReceiptData(parsedData);
-                setLoading(false);
-            } catch (error) {
-                console.error('Error fetching receipt data:', error);
-                setLoading(false);
-            }
-        };
-
-        fetchReceiptData();
-    }, []);
-
-    if (loading) {
-        return <div>Loading...</div>;
-    }
-
-    function formatDateRange(start: string, end: string): string {
-        const formatDate = (date: string): string => {
-            const options: Intl.DateTimeFormatOptions = { month: '2-digit', day: '2-digit' };
-            return new Date(date).toLocaleString('en-US', options);
-        };
-
-        const startDate = new Date(start);
-        const endDate = new Date(end);
-
-        if (startDate.toLocaleDateString() === endDate.toLocaleDateString()) {
-            return `${formatDate(start)}`;
-        }
-
-        return `${formatDate(start)} → ${formatDate(end)}`;
-    }
-
-    function hoursBetween(start: string, end: string): number {
-        const startDate = new Date(start);
-        const endDate = new Date(end);
-        const diffInMilliseconds = endDate.getTime() - startDate.getTime();
-        return diffInMilliseconds / (1000 * 60 * 60);
-    }
-
-
     return (
         <div className="max-w-[500px]">
             <DataTable columns={columns} data={processedMockData} />

@@ -1,6 +1,6 @@
 "use client"
 
-import * as React from "react"
+import React, { useState, ReactNode } from 'react';
 import {
     ColumnDef,
     SortingState,
@@ -19,6 +19,7 @@ import {
     TableHeader,
     TableRow,
 } from "./shadui"
+import { Tooltip } from "@nextui-org/tooltip";
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
@@ -83,24 +84,31 @@ export function DataTable<TData, TValue>({
                     {table.getRowModel().rows?.length ? (
                         table.getRowModel().rows.map((row) => {
                             return (
-                                <TableRow
-                                    key={row.id}
-                                    data-state={row.getIsSelected() && "selected"}
-                                    className="transform transition-transform hover:scale-105 hover:bg-gray-100 cursor-pointer hover:shadow-md"
-                                    onClick={() => handleRowClick(row)}
-                                >
-                                    {row.getVisibleCells().map((cell) => {
-                                        const value = cell.getValue();
-                                        const cellClass = getCellClass(value, cell.column.id);
-                                        const isMarketPriceRow = value === "Invalid Date" || (typeof value === 'number' && isNaN(value)) || value === "0";
+                                <Tooltip color='default' placement='right' size='lg' showArrow content='hi' className='text-black rounded-md'>
 
-                                        return (
-                                            <TableCell key={cell.id} className={`text-center ${cellClass}`}>
-                                                {!isMarketPriceRow && <div>{flexRender(cell.column.columnDef.cell, cell.getContext())}</div>}
-                                            </TableCell>
-                                        );
-                                    })}
-                                </TableRow>
+                                    <TableRow
+                                        key={row.id}
+                                        data-state={row.getIsSelected() && "selected"}
+                                        className={`transform transition-transform cursor-pointer hover:shadow-sm ${row.getVisibleCells().some(cell => {
+                                            const value = cell.getValue();
+                                            return value === "Invalid Date" || (typeof value === 'number' && isNaN(value)) || value === "0";
+                                        }) ? 'bg-gray-100 hover:scale-100 hover:shadow-none' : 'hover:bg-gray-100'
+                                            }`}
+                                        onClick={() => handleRowClick(row)}
+                                    >
+                                        {row.getVisibleCells().map((cell) => {
+                                            const value = cell.getValue();
+                                            const cellClass = getCellClass(value, cell.column.id);
+                                            const isMarketPriceRow = value === "Invalid Date" || (typeof value === 'number' && isNaN(value)) || value === "0";
+
+                                            return (
+                                                <TableCell key={cell.id} className={`text-center ${cellClass}`}>
+                                                    {!isMarketPriceRow && <div>{flexRender(cell.column.columnDef.cell, cell.getContext())}</div>}
+                                                </TableCell>
+                                            );
+                                        })}
+                                    </TableRow>
+                                </Tooltip>
                             );
                         })
                     ) : (
@@ -115,3 +123,30 @@ export function DataTable<TData, TValue>({
         </div >
     )
 }
+
+interface OrderBookTooltipProps {
+    children: ReactNode;
+    content: string;
+}
+
+const OrderBookTooltip: React.FC<OrderBookTooltipProps> = ({ children, content }) => {
+    const [visible, setVisible] = useState(false);
+
+    const showTooltip = () => setVisible(true);
+    const hideTooltip = () => setVisible(false);
+
+    return (
+        <div
+            onMouseEnter={showTooltip}
+            onMouseLeave={hideTooltip}
+            className="relative inline-block"
+        >
+            {children}
+            {visible && (
+                <div className="absolute left-full ml-2 p-2 bg-black text-white text-sm rounded shadow-lg">
+                    {content}
+                </div>
+            )}
+        </div>
+    );
+};
