@@ -29,7 +29,8 @@ export function DataTable<TData, TValue>({
     columns,
     data,
 }: DataTableProps<TData, TValue>) {
-    const [sorting, setSorting] = React.useState<SortingState>([])
+    const [sorting, setSorting] = React.useState<SortingState>([{ id: 'price', desc: true }]); // pre sort in descending (green on top)
+
 
     const table = useReactTable({
         data,
@@ -48,9 +49,12 @@ export function DataTable<TData, TValue>({
 
     const getCellClass = (value: any, columnId: any) => {
         const marketPrice = "2.85" // prob should be some api call
-        if (columnId !== "price") return
-        return value >= marketPrice ? 'text-emerald-600' : "text-red-600"
+        if (columnId !== "price") return ""
+        if (value == marketPrice) return ""
+        return value > marketPrice ? 'text-emerald-600' : "text-red-600"
     };
+
+    const marketPrice = 2.85;
 
 
     return (
@@ -88,15 +92,15 @@ export function DataTable<TData, TValue>({
                                     {row.getVisibleCells().map((cell) => {
                                         const value = cell.getValue();
                                         const cellClass = getCellClass(value, cell.column.id);
+                                        const isMarketPriceRow = value === "Invalid Date" || (typeof value === 'number' && isNaN(value)) || value === "0";
 
                                         return (
                                             <TableCell key={cell.id} className={`text-center ${cellClass}`}>
-                                                <div>{flexRender(cell.column.columnDef.cell, cell.getContext())}</div>
+                                                {!isMarketPriceRow && <div>{flexRender(cell.column.columnDef.cell, cell.getContext())}</div>}
                                             </TableCell>
                                         );
                                     })}
                                 </TableRow>
-
                             );
                         })
                     ) : (
@@ -108,6 +112,6 @@ export function DataTable<TData, TValue>({
                     )}
                 </TableBody>
             </Table>
-        </div>
+        </div >
     )
 }

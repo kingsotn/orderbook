@@ -129,6 +129,16 @@ const mockData = [
         total: "157.5",
         endTime: "Jul 05, 2024 @2:00 PM"
     },
+    {
+        refNumber: "marketPriceRow",
+        orderType: " ",
+        price: "2.85",
+        gpuCount: "0",
+        startDate: " ",
+        time: " ",
+        total: "0",
+        endTime: " "
+    },
 ];
 
 function formatDateRange(start: string, end: string): string {

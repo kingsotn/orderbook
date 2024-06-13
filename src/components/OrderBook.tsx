@@ -52,11 +52,11 @@ export const columns: ColumnDef<ReceiptData>[] = [
         header: ({ column }) => {
             const isSorted = column.getIsSorted();
             return (
-                < Button
+                <Button
                     variant='flat'
                     size="sm"
                     fullWidth
-                    endContent={< UpDownSVG />}
+                    endContent={<UpDownSVG />}
                     disableAnimation
                     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                     className={`border-none bg-white ${isSorted ? 'font-semibold' : ''}`}
@@ -66,9 +66,7 @@ export const columns: ColumnDef<ReceiptData>[] = [
             )
         },
         cell: ({ row, column }) => {
-            const price = parseFloat(row.getValue("price"))
-            const isSorted = column.getIsSorted();
-            const orderType = row.getValue("orderType");
+            const price = parseFloat(row.getValue("price"));
             return <div className="">{price}</div>;
         },
     },
@@ -94,8 +92,6 @@ export const columns: ColumnDef<ReceiptData>[] = [
         },
         cell: ({ row, column }) => {
             const gpuCount = parseFloat(row.getValue("gpuCount"))
-            const isSorted = column.getIsSorted();
-            const orderType = row.getValue("orderType");
             return <div className="">{gpuCount}</div>;
         },
     },
@@ -146,7 +142,6 @@ export const columns: ColumnDef<ReceiptData>[] = [
         },
         cell: ({ row, column }) => {
             const hours = parseFloat(row.getValue("hours"))
-            const isSorted = column.getIsSorted();
             return <div className="">{hours}</div>;
         },
     },
@@ -240,7 +235,7 @@ const OrderBook: React.FC = () => {
 
 
     return (
-        <div className="max-w-[500px] flex flex-col justify-center">
+        <div className="max-w-[500px]">
             <DataTable columns={columns} data={processedMockData} />
         </div>
     );
