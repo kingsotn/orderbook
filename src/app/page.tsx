@@ -9,9 +9,13 @@ import OrderBook from "@/components/OrderBook";
 export default function Home() {
   return (
     <NextUIProvider>
-      <main className="flex flex-col p-24 text-stone-950">
-        <PlaceOrderForm />
-        <OrderBook />
+      <main className="flex p-24 justify-evenly text-stone-950 mx-auto max-w-7xl">
+        <div className="flex mx-4">
+          <PlaceOrderForm />
+        </div>
+        <div className="flex mx-4">
+          <OrderBook />
+        </div>
 
         {/* <div className="min-h-screen bg-gray-100 p-4"> */}
         {/* <h1 className="text-2xl font-bold mb-4 font-color">Dashboard</h1>

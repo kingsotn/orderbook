@@ -63,13 +63,31 @@ export function DataTable<TData, TValue>({
         const original = row.original;
         return (
             <div>
-                {Object.entries(original).map(([key, value]) => (
-                    key !== "range" ? (
-                        <div key={key} className="flex justify-between">
-                            <strong>{key}:</strong> {value as ReactNode}
-                        </div>
-                    ) : null
-                ))}
+                {Object.entries(original).map(([key, value]) => {
+                    if (key === "price" || key == "total") value = `$` + value
+                    if (key === "start" || key === "end") {
+                        // Ensure value is treated as a string
+                        const date = new Date(value as string);
+
+                        // Format the date as MM/DD @H PM/AM
+                        const formattedDate = `${date.getMonth() + 1}/${date.getDate()} @${date.getHours() % 12 || 12}${date.getHours() >= 12 ? 'PM' : 'AM'}`;
+
+                        return (
+                            <div key={key} className="flex justify-between">
+                                <span className="mr-4 text-gray-600 mb-1">{key}:</span>
+                                <span className="ml-4">{formattedDate}</span>
+                            </div>
+                        );
+                    } else if (key !== "range") {
+                        return (
+                            <div key={key} className="flex justify-between">
+                                <span className="mr-4 text-gray-600 mb-1">{key}:</span>
+                                <span className="ml-4">{value as ReactNode}</span>
+                            </div>
+                        );
+                    }
+                    return null;
+                })}
             </div>
         );
     };
@@ -109,7 +127,7 @@ export function DataTable<TData, TValue>({
                                         showArrow
                                         content={renderTooltipContent(row)}
                                         closeDelay={0}
-                                        className='text-black rounded-md bg-opacity-70'
+                                        className='text-black rounded-md bg-opacity-85 p-6 text-sm'
                                     >
                                         <TableRow
                                             key={row.id}
@@ -134,14 +152,14 @@ export function DataTable<TData, TValue>({
                                             })}
                                         </TableRow>
                                     </Tooltip>
-                                ) : (
+                                ) : ( // this is the marketPriceRow
                                     <TableRow
                                         key={row.id}
                                         data-state={row.getIsSelected() && "selected"}
                                         className={`transform transition-transform cursor-pointer hover:shadow-sm ${row.getVisibleCells().some(cell => {
                                             const value = cell.getValue();
                                             return value === "Invalid Date" || (typeof value === 'number' && isNaN(value)) || value === "0";
-                                        }) ? 'bg-gray-100 hover:scale-100 hover:shadow-none' : 'hover:bg-gray-100'
+                                        }) ? 'bg-gray-100 text-gray-600 hover:scale-100 hover:shadow-none' : 'hover:bg-gray-100'
                                             }`}
                                         onClick={() => handleRowClick(row)}
                                     >

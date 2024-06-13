@@ -60,7 +60,7 @@ export const columns: ColumnDef<ReceiptData>[] = [
                     endContent={<UpDownSVG />}
                     disableAnimation
                     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                    className={`border-none bg-white ${isSorted ? 'font-semibold' : ''}`}
+                    className={`pt-2 border-none bg-white ${isSorted ? 'font-semibold' : ''}`}
                 >
                     $ / gpuhr
                 </Button>
@@ -68,7 +68,7 @@ export const columns: ColumnDef<ReceiptData>[] = [
         },
         cell: ({ row, column }) => {
             const price = parseFloat(row.getValue("price"));
-            return <div className="flex justify-left pl-6 font-semibold ">{price.toFixed(2)}</div>;
+            return <div className="flex justify-left pl-6">{price.toFixed(2)}</div>;
         },
     },
     {
@@ -84,7 +84,7 @@ export const columns: ColumnDef<ReceiptData>[] = [
                     disableAnimation
                     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")
                     }
-                    className={`border-none bg-white ${isSorted ? 'font-semibold' : ''}`}
+                    className={`pt-2 border-none bg-white ${isSorted ? 'font-semibold' : ''}`}
 
                 >
                     GPUs
@@ -109,7 +109,7 @@ export const columns: ColumnDef<ReceiptData>[] = [
                     disableAnimation
                     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")
                     }
-                    className={`border-none bg-white ${isSorted ? 'font-semibold' : ''}`}
+                    className={`pt-2 border-none bg-white ${isSorted ? 'font-semibold' : ''}`}
                 >
                     Range
                 </Button >
@@ -133,7 +133,7 @@ export const columns: ColumnDef<ReceiptData>[] = [
                     disableAnimation
                     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")
                     }
-                    className={`border-none bg-white ${isSorted ? 'font-semibold' : ''}`}
+                    className={`pt-2 border-none bg-white ${isSorted ? 'font-semibold' : ''}`}
 
                 >
                     Hours
@@ -158,7 +158,7 @@ export const columns: ColumnDef<ReceiptData>[] = [
                     endContent={<UpDownSVG />}
                     disableAnimation
                     onClick={() => column.toggleSorting(isSorted === "asc")}
-                    className={`border-none bg-white ${isSorted ? 'font-semibold' : ''}`}
+                    className={`pt-2 border-none bg-white ${isSorted ? 'font-semibold' : ''}`}
                 >
                     Total ($)
                 </Button>
@@ -173,7 +173,7 @@ export const columns: ColumnDef<ReceiptData>[] = [
 
 const OrderBook: React.FC = () => {
     return (
-        <div className="max-w-[500px]">
+        <div className="min-w-[500px] max-w-[500px]">
             <DataTable columns={columns} data={processedMockData} />
         </div>
     );

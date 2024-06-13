@@ -506,7 +506,7 @@ const SubmitFormButton: React.FC<SubmitFormButtonProps> = ({ onClick, disabled, 
                 <path strokeLinecap="round" strokeLinejoin="round" d="m12.75 15 3-3m0 0-3-3m3 3h-7.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
             </svg>
             }
-            className="text-sm justify-start px-4 py-1 flex items-center w-18 h-10 hover:scale-105 rounded-md mr-3 mb-4 font-sans"
+            className="text-sm justify-start px-4 py-1 flex items-center w-18 h-10 hover:scale-105 rounded-md mb-4 font-sans"
         >
             <span className="truncate">{orderType}</span>
         </Button>
@@ -640,8 +640,8 @@ const PlaceOrderForm: React.FC = () => {
 
     return (
         <div
-            className="bg-white p-3 relative flex flex-col space-y-2 w-full min-w-[500px] max-w-[500px] mx-auto rounded-lg border-3 border-gray-400"
-            style={{ minHeight: '508px' }}
+            className=" bg-white px-6 py-4 relative flex flex-col space-y-2 w-full min-w-[500px] max-w-[500px] rounded-lg border-1 border-gray-200"
+            style={{ minHeight: '640px' }}
         >
             <Spacer y={3} />
             <RadioGroup
@@ -685,7 +685,7 @@ const PlaceOrderForm: React.FC = () => {
                 </div>
                 <Divider />
             </div>
-            <div className="relative bottom-0 right-0 mb-4 pt-8 text-right flex justify-end mx-1">
+            <div className="relative bottom-0 right-0 mb-4 flex justify-end">
                 <SubmitFormButton onClick={handleSubmitForm} disabled={!total} orderType={orderType} />
             </div>
         </div>
