@@ -656,10 +656,10 @@ const PlaceOrderForm: React.FC = () => {
                 <CustomRadio value="Market Sell" onChange={() => { setOrderType("Market Sell"); setPrice(marketPrice) }}>
                     Market Sell
                 </CustomRadio>
-                <CustomRadio value="Buy" onChange={() => setOrderType("Buy")}>
+                <CustomRadio value="Buy" onChange={() => { setOrderType("Buy"); setPrice(' ') }}>
                     Buy
                 </CustomRadio>
-                <CustomRadio value="Sell" onChange={() => setOrderType("Sell")}>
+                <CustomRadio value="Sell" onChange={() => { setOrderType("Sell"); setPrice(' ') }}>
                     Sell
                 </CustomRadio>
                 <Spacer y={4} />
