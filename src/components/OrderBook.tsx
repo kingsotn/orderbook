@@ -68,7 +68,7 @@ export const columns: ColumnDef<ReceiptData>[] = [
         },
         cell: ({ row, column }) => {
             const price = parseFloat(row.getValue("price"));
-            return <div className="flex justify-left pl-6">{price.toFixed(2)}</div>;
+            return <div className="flex justify-left pl-6 font-semibold ">{price.toFixed(2)}</div>;
         },
     },
     {

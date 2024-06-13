@@ -46,17 +46,33 @@ export function DataTable<TData, TValue>({
 
     const handleRowClick = (row: any) => {
         console.log(row.original); // Log the entire row's data
+        console.log(row.original.key); // Log the entire row's data
+        console.log(row.original.key); // Log the entire row's data
     }
 
     const getCellClass = (value: any, columnId: any) => {
         const marketPrice = "2.85" // prob should be some api call
         if (columnId !== "price") return ""
         if (value == marketPrice) return ""
-        return value > marketPrice ? 'text-emerald-600' : "text-red-600"
+        return value > marketPrice ? 'text-red-600' : "text-emerald-600"
     };
 
     const marketPrice = 2.85;
 
+    const renderTooltipContent = (row: any) => {
+        const original = row.original;
+        return (
+            <div>
+                {Object.entries(original).map(([key, value]) => (
+                    key !== "range" ? (
+                        <div key={key} className="flex justify-between">
+                            <strong>{key}:</strong> {value as ReactNode}
+                        </div>
+                    ) : null
+                ))}
+            </div>
+        );
+    };
 
     return (
         <div className="rounded-md border bg-white">
@@ -84,8 +100,41 @@ export function DataTable<TData, TValue>({
                     {table.getRowModel().rows?.length ? (
                         table.getRowModel().rows.map((row) => {
                             return (
-                                <Tooltip color='default' placement='right' size='lg' showArrow content='hi' className='text-black rounded-md'>
+                                ((row.original as any).refNumber !== "marketPriceRow") ? ( // don't render the marketPrice row
+                                    <Tooltip
+                                        color='default'
+                                        placement='right'
+                                        size='lg'
+                                        disableAnimation
+                                        showArrow
+                                        content={renderTooltipContent(row)}
+                                        closeDelay={0}
+                                        className='text-black rounded-md bg-opacity-70'
+                                    >
+                                        <TableRow
+                                            key={row.id}
+                                            data-state={row.getIsSelected() && "selected"}
+                                            className={`transform transition-transform cursor-pointer hover:shadow-sm ${row.getVisibleCells().some(cell => {
+                                                const value = cell.getValue();
+                                                return value === "Invalid Date" || (typeof value === 'number' && isNaN(value)) || value === "0";
+                                            }) ? 'bg-gray-100 hover:scale-100 hover:shadow-none' : 'hover:bg-gray-100'
+                                                }`}
+                                            onClick={() => handleRowClick(row)}
+                                        >
+                                            {row.getVisibleCells().map((cell) => {
+                                                const value = cell.getValue();
+                                                const cellClass = getCellClass(value, cell.column.id);
+                                                const isMarketPriceRow = value === "Invalid Date" || (typeof value === 'number' && isNaN(value)) || value === "0";
 
+                                                return (
+                                                    <TableCell key={cell.id} className={`text-center ${cellClass}`}>
+                                                        {!isMarketPriceRow && <div>{flexRender(cell.column.columnDef.cell, cell.getContext())}</div>}
+                                                    </TableCell>
+                                                );
+                                            })}
+                                        </TableRow>
+                                    </Tooltip>
+                                ) : (
                                     <TableRow
                                         key={row.id}
                                         data-state={row.getIsSelected() && "selected"}
@@ -108,7 +157,7 @@ export function DataTable<TData, TValue>({
                                             );
                                         })}
                                     </TableRow>
-                                </Tooltip>
+                                )
                             );
                         })
                     ) : (
@@ -119,34 +168,8 @@ export function DataTable<TData, TValue>({
                         </TableRow>
                     )}
                 </TableBody>
+
             </Table>
         </div >
     )
 }
-
-interface OrderBookTooltipProps {
-    children: ReactNode;
-    content: string;
-}
-
-const OrderBookTooltip: React.FC<OrderBookTooltipProps> = ({ children, content }) => {
-    const [visible, setVisible] = useState(false);
-
-    const showTooltip = () => setVisible(true);
-    const hideTooltip = () => setVisible(false);
-
-    return (
-        <div
-            onMouseEnter={showTooltip}
-            onMouseLeave={hideTooltip}
-            className="relative inline-block"
-        >
-            {children}
-            {visible && (
-                <div className="absolute left-full ml-2 p-2 bg-black text-white text-sm rounded shadow-lg">
-                    {content}
-                </div>
-            )}
-        </div>
-    );
-};
