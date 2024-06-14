@@ -29,7 +29,6 @@ function hoursBetween(start: string, end: string): number {
 }
 
 function processMockData(mockData: any) {
-    console.log(mockData)
     return mockData.map((data: any) => {
         return {
             refNumber: data.refNumber,

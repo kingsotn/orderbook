@@ -231,7 +231,7 @@ const CustomForm: React.FC<{
 
 
         if (key === 'Tab') {
-            console.log('here too')
+            // console.log('here too')
             e.preventDefault();
             if (!shiftKey) {
                 const nextInput = document.getElementById(nextInputId);
@@ -561,14 +561,14 @@ const PlaceOrderForm: React.FC = () => {
     const totalString: string = (parseFloat(price) * parseInt(gpus, 10) * durationToHours(duration)).toFixed(2); // add two dec places
     const total: number = Number(totalString) * 100 / 100;
     useEffect(() => {
-        console.log("pr", price)
-        console.log("gpus", gpus)
-        console.log("duration", duration)
-        // setGpus(gpus)
-        // console.log(price, gpus, duration)
-        console.log("total", total);
+        // console.log("pr", price)
+        // console.log("gpus", gpus)
+        // console.log("duration", duration)
+        // // setGpus(gpus)
+        // // console.log(price, gpus, duration)
+        // console.log("total", total);
 
-        console.log("END TIME BRUDA", endTime)
+        // console.log("END TIME", endTime)
 
         // set marketPrice
         if (orderType === "Market Buy" || orderType === "Market Sell") setPrice(marketPrice);
@@ -603,7 +603,7 @@ const PlaceOrderForm: React.FC = () => {
     const processedReceiptData = constructReceiptData(receiptData, marketPrice);
 
     // submit form
-const handleSubmitForm = async () => {
+    const handleSubmitForm = async () => {
         console.log("submitted");
 
         const formattedReceiptData = Object.entries(processedReceiptData)
@@ -638,7 +638,7 @@ const handleSubmitForm = async () => {
     return (
         <div
             className=" bg-white px-6 py-4 relative flex flex-col space-y-2 w-full min-w-[500px] max-w-[500px] rounded-lg border-1 border-gray-200"
-            style={{ minHeight: '640px' }}
+            style={{ minHeight: '640px', maxHeight: '640px' }}
         >
             <Spacer y={3} />
             <RadioGroup

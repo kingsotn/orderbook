@@ -52,9 +52,8 @@ const OrderBook: React.FC = () => {
     }, [prevDataLength]);
 
     return (
-        <div className="min-w-[500px] max-w-[500px]">
+        <div className="min-w-[500px] max-w-[500px] overflow-y-auto">
             <DataTable columns={columns} data={data} />
-            {loading && <div>Loading...</div>}
         </div>
     );
 };
