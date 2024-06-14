@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react';
 import { RadioGroup, Radio, cn, Input, Spacer, Slider } from "@nextui-org/react";
 import { DatePicker } from "@nextui-org/react";
 import { now, getLocalTimeZone, today, DateValue, parseDateTime, CalendarDateTime } from "@internationalized/date";
-import { Tabs, Tab } from "@nextui-org/react";
 import { Skeleton } from "@nextui-org/skeleton";
 
 export const CustomRadio = (props: any) => {
