@@ -4,6 +4,7 @@ import { RadioGroup, Radio, cn, Input, Spacer, Slider } from "@nextui-org/react"
 import { DatePicker } from "@nextui-org/react";
 import { now, getLocalTimeZone, today, DateValue, parseDateTime, CalendarDateTime } from "@internationalized/date";
 import { Tabs, Tab } from "@nextui-org/react";
+import { Skeleton } from "@nextui-org/skeleton";
 
 export const CustomRadio = (props: any) => {
     const { children, ...otherProps } = props;
@@ -400,81 +401,94 @@ const Receipt: React.FC<ReceiptProps> = ({ receiptData, endTime, setEndTime }) =
         calculateEndTime(time, duration)
     }, [duration]);
 
+    useEffect(() => {
+        // Set isLoaded to true after the initial render
+        setIsLoaded(true);
+    }, []); // Empty dependency array ensures this runs once on component mount
+
+
+    const [isLoaded, setIsLoaded] = React.useState(false);
+
+
     return (
-        <AnimatePresence>
-            <div className="font-mono">
-                <div className="text-sm mt-4 pl-2 mb-1 font-normal">
-                    Order Summary
-                </div>
-                <Divider />
-                <div className="px-2 py-2">
-                    {receiptFields.map((field, index) => (
-                        <div key={index} className="w-full font-mono text-xs flex justify-between py-1">
-                            <div className="text-left text-gray-500">
-                                {field.label}
-                            </div>
-                            <div className="text-right">
-                                {field.value ? (
-                                    field.label === "Ends" ? (
-                                        endTime.split('').map((char, charIndex) => (
+        <div className="flex flex-col gap-3">
+            <AnimatePresence>
+                <div className="font-mono">
+                    <div className="text-sm mt-4 pl-2 mb-1 font-normal">
+                        Order Summary
+                    </div>
+                    <Divider />
+                    <div className="px-2 py-2">
+                        {receiptFields.map((field, index) => (
+                            <div key={index} className="w-full font-mono text-xs flex justify-between py-1">
+                                <div className="text-left text-gray-500">
+                                    {field.label}
+                                </div>
+                                <div className="text-right">
+                                    <Skeleton isLoaded={isLoaded} className="rounded-md" disableAnimation>
+                                        {field.value ? (
+                                            field.label === "Ends" ? (
+                                                endTime.split('').map((char, charIndex) => (
+                                                    <motion.span
+                                                        key={`${field.label}-${charIndex}`}
+                                                        initial={{ opacity: 0, y: 20 }}
+                                                        animate={{ opacity: 1, y: 0 }}
+                                                        transition={{ duration: 0.15 }}
+                                                        exit={{
+                                                            opacity: 0,
+                                                            y: 5,
+                                                            transition: {
+                                                                duration: 0.08,
+                                                            },
+                                                        }}
+                                                        className={`inline-block ${char === ' ' ? 'mr-1' : ' '}`}
+                                                    >
+                                                        {char}
+                                                    </motion.span>
+                                                ))
+                                            ) : (
+                                                field.value.split('').map((char, charIndex) => (
+                                                    <motion.span
+                                                        key={`${field.label}-${charIndex}`}
+                                                        initial={{ opacity: 0, y: 20 }}
+                                                        animate={{ opacity: 1, y: 0 }}
+                                                        transition={{ duration: 0.15 }}
+                                                        exit={{
+                                                            opacity: 0,
+                                                            y: 5,
+                                                            transition: {
+                                                                duration: 0.08,
+                                                            },
+                                                        }}
+                                                        className={`inline-block ${char === ' ' ? 'mr-1' : ' '} ${field.label === "Total" ? 'font-bold' : ''}`}
+                                                    >
+                                                        {char}
+                                                    </motion.span>
+                                                ))
+                                            )
+                                        ) : (
                                             <motion.span
-                                                key={`${field.label}-${charIndex}`}
                                                 initial={{ opacity: 0, y: 20 }}
                                                 animate={{ opacity: 1, y: 0 }}
-                                                transition={{ duration: 0.15 }}
                                                 exit={{
                                                     opacity: 0,
-                                                    y: 5,
+                                                    y: 100,
                                                     transition: {
-                                                        duration: 0.08,
+                                                        duration: 0.15,
                                                     },
                                                 }}
-                                                className={`inline-block ${char === ' ' ? 'mr-1' : ' '}`}
                                             >
-                                                {char}
+                                                -
                                             </motion.span>
-                                        ))
-                                    ) : (
-                                        field.value.split('').map((char: any, charIndex: any) => (
-                                            <motion.span
-                                                key={`${field.label}-${charIndex}`}
-                                                initial={{ opacity: 0, y: 20 }}
-                                                animate={{ opacity: 1, y: 0 }}
-                                                transition={{ duration: 0.15 }}
-                                                exit={{
-                                                    opacity: 0,
-                                                    y: 5,
-                                                    transition: {
-                                                        duration: 0.08,
-                                                    },
-                                                }}
-                                                className={`inline-block ${char === ' ' ? 'mr-1' : ' '} ${field.label === "Total" ? 'font-bold' : ''}`}
-                                            >
-                                                {char}
-                                            </motion.span>
-                                        ))
-                                    )
-                                ) : (
-                                    <motion.span
-                                        initial={{ opacity: 0, y: 20 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        exit={{
-                                            opacity: 0,
-                                            y: 100,
-                                            transition: {
-                                                duration: 0.15,
-                                            },
-                                        }}
-                                    >
-                                        -
-                                    </motion.span>
-                                )}
+                                        )}
+                                    </Skeleton>
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        ))}
+                    </div>
                 </div>
-            </div>
-        </AnimatePresence>
+            </AnimatePresence>
+        </div>
     );
 };
 

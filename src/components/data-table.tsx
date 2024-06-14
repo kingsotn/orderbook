@@ -1,12 +1,11 @@
 "use client"
 
-import React, { useState, ReactNode } from 'react';
+import React, { useState } from 'react';
 import {
     ColumnDef,
     SortingState,
     flexRender,
     getCoreRowModel,
-    getPaginationRowModel,
     getSortedRowModel,
     useReactTable,
 } from "@tanstack/react-table"
@@ -101,7 +100,12 @@ export function DataTable<TData, TValue>({
         );
     };
 
+    const [isLoaded, setIsLoaded] = useState(false);
 
+    // const [isLoaded, setIsLoaded] = useState<boolean>(false)
+    // useEffect(() => {
+    //     setIsLoaded(true);
+    // }, [])
     return (
         <div className="rounded-md border bg-white">
             <Table>
@@ -150,6 +154,8 @@ export function DataTable<TData, TValue>({
                                                 }`}
                                             onClick={() => handleRowClick(row)}
                                         >
+
+
                                             {row.getVisibleCells().map((cell) => {
                                                 const value = cell.getValue();
                                                 const cellClass = getCellClass(value, cell.column.id);
@@ -161,6 +167,7 @@ export function DataTable<TData, TValue>({
                                                     </TableCell>
                                                 );
                                             })}
+
                                         </TableRow>
                                     </Tooltip>
                                 ) : ( // this is the marketPriceRow, there's some subtle diff in the styling
@@ -174,6 +181,7 @@ export function DataTable<TData, TValue>({
                                             }`}
                                         onClick={() => handleRowClick(row)}
                                     >
+
                                         {row.getVisibleCells().map((cell) => {
                                             const value = cell.getValue();
                                             const cellClass = getCellClass(value, cell.column.id);
@@ -185,6 +193,7 @@ export function DataTable<TData, TValue>({
                                                 </TableCell>
                                             );
                                         })}
+
                                     </TableRow>
                                 )
                             );

@@ -3,7 +3,8 @@ import * as React from "react"
 import { ColumnDef } from "@tanstack/react-table"
 import { DataTable } from './data-table';
 import { processedMockData } from './mock_data';
-import { Button } from '@nextui-org/react';
+import { Button, Skeleton } from '@nextui-org/react';
+import { useEffect, useState } from "react";
 
 const UpDownSVG = () => (
     <svg
@@ -160,10 +161,17 @@ export const columns: ColumnDef<ReceiptData>[] = [
 ];
 
 const OrderBook: React.FC = () => {
+    const [isLoaded, setIsLoaded] = useState(false);
+    useEffect(() => {
+        setIsLoaded(true)
+    }, []); // Empty dependency array ensures this runs once on component mount
+
     return (
-        <div className="min-w-[500px] max-w-[500px]">
-            <DataTable columns={columns} data={processedMockData} />
-        </div>
+        <Skeleton isLoaded={isLoaded} className="before:-translate-x-1/8 before:opacity-35 rounded-md">
+            <div className="min-w-[500px] max-w-[500px]">
+                <DataTable columns={columns} data={processedMockData} />
+            </div>
+        </Skeleton>
     );
 };
 
