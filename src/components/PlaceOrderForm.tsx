@@ -378,37 +378,44 @@ const Receipt: React.FC<ReceiptProps> = ({ receiptData, setEndTime }) => {
         { label: 'Total', value: total ? `$ ${total.toLocaleString()}` : "" }
     ].filter(field => field.value);
 
-    const animationVariants = {
-        initial: { opacity: 0.5, y: 10 },
-        animate: { opacity: 1, y: 5 },
-    };
 
     // useEffect(() => {
     //     console.log("formated", getHourNumber(duration), getHourLabel(duration));
     //     console.log("endtime", calculateEndTime(time, duration))
     // }, [duration]);
 
+    const [calculatedEndTime, setCalculatedEndTime] = useState<string>('');
 
-    function calculateEndTime(time: string, duration: number) {
-        if (!time || !duration) {
-            const oneHourFromNow = new Date(Math.ceil((Date.now() + 3600 * 1000) / (60 * 60 * 1000)) * (60 * 60 * 1000)); //rounded up to the next hour
-            console.log("oneHourFromNow", oneHourFromNow)
-            setEndTime(formatDateTime(oneHourFromNow))
-            return formatDateTime(oneHourFromNow);
-        }
+    useEffect(() => {
+        const calculateEndTime = (time: string, duration: number): Date => {
+            if (!time || !duration) {
+                const oneHourFromNow = new Date(Math.ceil((Date.now() + 3600 * 1000) / (60 * 60 * 1000)) * (60 * 60 * 1000)); //rounded up to the next hour
+                console.log("oneHourFromNow", oneHourFromNow);
+                const formattedEndTime = formatDateTime(oneHourFromNow);
+                setEndTime(formattedEndTime);
+                return oneHourFromNow;
+            }
 
-        const durationValue = getHourNumber(duration); // Get the numeric value
-        const durationLabel = getHourLabel(duration); // Get the unit (day(s) or hour(s))
+            const durationValue = getHourNumber(duration); // Get the numeric value
+            const durationLabel = getHourLabel(duration); // Get the unit (day(s) or hour(s))
 
-        // Calculate total hours
-        const totalHours = durationLabel.includes('day') ? durationValue * 24 : durationValue;
+            // Calculate total hours
+            const totalHours = durationLabel.includes('day') ? durationValue * 24 : durationValue;
+
+            // Calculate end time
+            const endTime = new Date(new Date(time).getTime() + totalHours * 60 * 60 * 1000);
+            const formattedEndTime = formatDateTime(endTime);
+            setEndTime(formattedEndTime);
+            return endTime;
+        };
 
 
-        // Calculate end time
-        const endTime = new Date(new Date(time).getTime() + totalHours * 60 * 60 * 1000);
-        setEndTime(formatDateTime(endTime))
-        return formatDateTime(endTime);
-    }
+        const endTime = calculateEndTime(time, duration); // from the props
+        setCalculatedEndTime(formatDateTime(endTime));
+        console.log(calculatedEndTime)
+    }, [setEndTime]);
+
+
 
 
 
@@ -428,7 +435,7 @@ const Receipt: React.FC<ReceiptProps> = ({ receiptData, setEndTime }) => {
                             <div className="text-right">
                                 {field.value ? (
                                     field.label === "Ends" ? (
-                                        calculateEndTime(time, duration).split('').map((char, charIndex) => (
+                                        calculatedEndTime.split('').map((char, charIndex) => (
                                             <motion.span
                                                 key={`${field.label}-${charIndex}`}
                                                 initial={{ opacity: 0, y: 20 }}

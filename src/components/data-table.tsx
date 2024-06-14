@@ -152,14 +152,14 @@ export function DataTable<TData, TValue>({
                                             })}
                                         </TableRow>
                                     </Tooltip>
-                                ) : ( // this is the marketPriceRow
+                                ) : ( // this is the marketPriceRow, there's some subtle diff in the styling
                                     <TableRow
                                         key={row.id}
                                         data-state={row.getIsSelected() && "selected"}
                                         className={`transform transition-transform cursor-pointer hover:shadow-sm ${row.getVisibleCells().some(cell => {
                                             const value = cell.getValue();
                                             return value === "Invalid Date" || (typeof value === 'number' && isNaN(value)) || value === "0";
-                                        }) ? 'bg-gray-100 text-gray-600 hover:scale-100 hover:shadow-none' : 'hover:bg-gray-100'
+                                        }) ? 'bg-gray-100 text-gray-600 hover:scale-100 hover:shadow-none hover:cursor-default' : 'hover:bg-gray-100'
                                             }`}
                                         onClick={() => handleRowClick(row)}
                                     >
