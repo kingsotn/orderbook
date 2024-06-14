@@ -301,12 +301,12 @@ interface ReceiptType {
 
 interface ReceiptProps {
     receiptData: ReceiptType;
+    endTime: string;
     setEndTime: React.Dispatch<React.SetStateAction<string>>
 }
 
-import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import { AnimatePresence, motion } from "framer-motion"
-const Receipt: React.FC<ReceiptProps> = ({ receiptData, setEndTime }) => {
+const Receipt: React.FC<ReceiptProps> = ({ receiptData, endTime, setEndTime }) => {
     const {
         refNumber,
         orderType,
@@ -384,17 +384,8 @@ const Receipt: React.FC<ReceiptProps> = ({ receiptData, setEndTime }) => {
     //     console.log("endtime", calculateEndTime(time, duration))
     // }, [duration]);
 
-    const [calculatedEndTime, setCalculatedEndTime] = useState<string>('');
-
     useEffect(() => {
-        const calculateEndTime = (time: string, duration: number): Date => {
-            if (!time || !duration) {
-                const oneHourFromNow = new Date(Math.ceil((Date.now() + 3600 * 1000) / (60 * 60 * 1000)) * (60 * 60 * 1000)); //rounded up to the next hour
-                console.log("oneHourFromNow", oneHourFromNow);
-                const formattedEndTime = formatDateTime(oneHourFromNow);
-                setEndTime(formattedEndTime);
-                return oneHourFromNow;
-            }
+        const calculateEndTime = (time: string, duration: number) => {
 
             const durationValue = getHourNumber(duration); // Get the numeric value
             const durationLabel = getHourLabel(duration); // Get the unit (day(s) or hour(s))
@@ -402,22 +393,12 @@ const Receipt: React.FC<ReceiptProps> = ({ receiptData, setEndTime }) => {
             // Calculate total hours
             const totalHours = durationLabel.includes('day') ? durationValue * 24 : durationValue;
 
-            // Calculate end time
-            const endTime = new Date(new Date(time).getTime() + totalHours * 60 * 60 * 1000);
-            const formattedEndTime = formatDateTime(endTime);
-            setEndTime(formattedEndTime);
-            return endTime;
+            // Calculate and set end time
+            const calculatedEndTime: Date = new Date(new Date(time).getTime() + totalHours * 60 * 60 * 1000);
+            setEndTime(formatDateTime(calculatedEndTime))
         };
-
-
-        const endTime = calculateEndTime(time, duration); // from the props
-        setCalculatedEndTime(formatDateTime(endTime));
-        console.log(calculatedEndTime)
-    }, [setEndTime]);
-
-
-
-
+        calculateEndTime(time, duration)
+    }, [duration]);
 
     return (
         <AnimatePresence>
@@ -435,7 +416,7 @@ const Receipt: React.FC<ReceiptProps> = ({ receiptData, setEndTime }) => {
                             <div className="text-right">
                                 {field.value ? (
                                     field.label === "Ends" ? (
-                                        calculatedEndTime.split('').map((char, charIndex) => (
+                                        endTime.split('').map((char, charIndex) => (
                                             <motion.span
                                                 key={`${field.label}-${charIndex}`}
                                                 initial={{ opacity: 0, y: 20 }}
@@ -521,7 +502,6 @@ const SubmitFormButton: React.FC<SubmitFormButtonProps> = ({ onClick, disabled, 
 };
 
 import { Divider } from "@nextui-org/divider";
-import { v4 as uuidv4 } from 'uuid';
 const PlaceOrderForm: React.FC = () => {
     const [orderType, setOrderType] = useState<string>('Market Buy'); // market buy, limit buy, market sell, limit sell
 
@@ -533,14 +513,11 @@ const PlaceOrderForm: React.FC = () => {
     const [refNumber, _] = useState("53347e23-6f48-4fed-8cae-5e18b3662771");
     const [endTime, setEndTime] = useState<string>("");
 
-
-
     // date stuff
     const initialDate = new Date();
     initialDate.setHours(initialDate.getHours() + 1, 0, 0, 0); // Round to the next hour
     const [startDate, setStartDate] = useState<Date>(initialDate);
     const [duration, setDuration] = useState(250); // Default value
-
 
     const getHourNumber = (val: number): number => {
         if (val <= 500) {
@@ -567,9 +544,6 @@ const PlaceOrderForm: React.FC = () => {
         return getHourLabel(duration).includes('day') ? getHourNumber(duration) * 24 : getHourNumber(duration);
     }
 
-
-
-
     const totalString: string = (parseFloat(price) * parseInt(gpus, 10) * durationToHours(duration)).toFixed(2); // add two dec places
     const total: number = Number(totalString) * 100 / 100;
     useEffect(() => {
@@ -580,10 +554,12 @@ const PlaceOrderForm: React.FC = () => {
         // console.log(price, gpus, duration)
         console.log("total", total);
 
+        console.log("END TIME BRUDA", endTime)
+
         // set marketPrice
         if (orderType === "Market Buy" || orderType === "Market Sell") setPrice(marketPrice);
 
-    }, [duration]);
+    }, [duration, endTime]);
 
 
 
@@ -688,7 +664,7 @@ const PlaceOrderForm: React.FC = () => {
                     orderType={orderType}
                 />
                 <div className="w-full">
-                    <Receipt receiptData={processedReceiptData} setEndTime={setEndTime} />
+                    <Receipt receiptData={processedReceiptData} endTime={endTime} setEndTime={setEndTime} />
                 </div>
                 <Divider />
             </div>

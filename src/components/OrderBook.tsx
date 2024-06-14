@@ -1,17 +1,5 @@
 "use client";
-import { useEffect, useState } from 'react';
 import * as React from "react"
-import { Tabs, Tab } from "@nextui-org/react";
-// import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell } from "@nextui-org/react";
-import {
-    Table,
-    TableBody,
-    TableCaption,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "./shadui"
 import { ColumnDef } from "@tanstack/react-table"
 import { DataTable } from './data-table';
 import { processedMockData } from './mock_data';

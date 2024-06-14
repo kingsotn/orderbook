@@ -294,7 +294,7 @@ function formatDateRange(start: string, end: string): string {
 
 
     if (startDate.toLocaleDateString() === endDate.toLocaleDateString()) {
-        return `${formatDate(start)} → `;
+        return `${formatDate(start)}`;
     }
 
     return `${formatDate(start)} → ${formatDate(end)}`;

@@ -61,10 +61,20 @@ export function DataTable<TData, TValue>({
 
     const renderTooltipContent = (row: any) => {
         const original = row.original;
+
+        // Filter out the "range" key and format "price" and "total" values
+        const filteredEntries = Object.entries(original)
+            .filter(([key, value]) => key !== 'range')
+            .map(([key, value]) => {
+                if (key === "price" || key === "total") {
+                    value = `$` + value;
+                }
+                return [key, value];
+            });
+
         return (
             <div>
-                {Object.entries(original).map(([key, value]) => {
-                    if (key === "price" || key == "total") value = `$` + value
+                {filteredEntries.map(([key, value]) => {
                     if (key === "start" || key === "end") {
                         // Ensure value is treated as a string
                         const date = new Date(value as string);
@@ -78,19 +88,19 @@ export function DataTable<TData, TValue>({
                                 <span className="ml-4">{formattedDate}</span>
                             </div>
                         );
-                    } else if (key !== "range") {
+                    } else {
                         return (
-                            <div key={key} className="flex justify-between">
-                                <span className="mr-4 text-gray-600 mb-1">{key}:</span>
-                                <span className="ml-4">{value as ReactNode}</span>
+                            <div key={key as string} className="flex justify-between">
+                                <span className="mr-4 text-gray-600 mb-1">{key as string}:</span>
+                                <span className="ml-4">{value as React.ReactNode}</span>
                             </div>
                         );
                     }
-                    return null;
                 })}
             </div>
         );
     };
+
 
     return (
         <div className="rounded-md border bg-white">
@@ -120,6 +130,7 @@ export function DataTable<TData, TValue>({
                             return (
                                 ((row.original as any).refNumber !== "marketPriceRow") ? ( // don't render the marketPrice row
                                     <Tooltip
+                                        key={`tooltip-${row.id}`} // Add key prop here
                                         color='default'
                                         placement='right'
                                         size='lg'
