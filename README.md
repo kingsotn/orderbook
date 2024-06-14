@@ -1,3 +1,5 @@
+![](/images/put-together.png)
+
 ## Getting Started
 
 First, run the development server:
@@ -80,8 +82,6 @@ This is much better but for many ppl mentally translating 07 to “July” also 
 When deciding which features to cut, we should decide the purpose of this application. Are users going to find more value in trading the unit costs of “compute” or would they be more interested in the actual renting? If it's unit costs, then we can remove the range, otherwise, if renting was a priority then the unit cost isn’t as important and we’d put that in the additional tooltip section. These need to be discovered — and I'm willing to do that.
 
 My buddy [@fiveoutofnine](https://x.com/fiveoutofnine/status/1777431614424817756) also talks about how for programmers can use certain colors for certain functionality. I found this very helpful, and maybe you would too.
-
-![](/images/put-together.png)
 
 nice looking good so far. Putting it all together ->
 
