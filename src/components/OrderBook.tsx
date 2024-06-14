@@ -1,8 +1,4 @@
 "use client";
-import { ColumnDef } from "@tanstack/react-table"
-import { processedMockData } from './mock_data';
-import { Button, Skeleton } from '@nextui-org/react';
-import { AnimatePresence, motion } from "framer-motion"
 import { columns } from "./columns"
 import React, { useEffect, useState } from 'react';
 import { DataTable } from "./data-table";
@@ -18,9 +14,11 @@ import { ReceiptData } from "./columns";
 //     return data as ReceiptData;
 // };
 
+
 const OrderBook: React.FC = () => {
     const [data, setData] = useState<ReceiptData[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
+    const [prevDataLength, setPrevDataLength] = useState<number>(0);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -34,7 +32,12 @@ const OrderBook: React.FC = () => {
                 });
                 const result = await response.json();
                 console.log("Fetched result:", result);
-                setData(result.data);
+
+                if (result.data.length !== prevDataLength) {
+                    setData(result.data);
+                    setPrevDataLength(result.data.length);
+                }
+
                 setLoading(false);
             } catch (error) {
                 console.error('Error fetching data:', error);
@@ -46,11 +49,12 @@ const OrderBook: React.FC = () => {
         const intervalId = setInterval(fetchData, 1000); // Fetch data every second
 
         return () => clearInterval(intervalId); // Clean up interval on component unmount
-    }, []);
+    }, [prevDataLength]);
 
     return (
         <div className="min-w-[500px] max-w-[500px]">
             <DataTable columns={columns} data={data} />
+            {loading && <div>Loading...</div>}
         </div>
     );
 };
