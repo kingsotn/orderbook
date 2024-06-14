@@ -29,6 +29,7 @@ function hoursBetween(start: string, end: string): number {
 }
 
 function processMockData(mockData: any) {
+    console.log(mockData)
     return mockData.map((data: any) => {
         return {
             refNumber: data.refNumber,
@@ -63,28 +64,42 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     res.setHeader('Expires', '0');
     res.setHeader('Surrogate-Control', 'no-store');
     try {
+
         if (req.method === 'POST') {
-            console.log("HIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIiii")
-            // Extract the receipt data from the request body
+
             const { receiptData } = req.body;
 
             if (!receiptData) {
                 throw new Error('No receiptData provided');
             }
 
-            // Check if receiptData.orderType exists and doesn't contain "Market"
-            // if (receiptData.orderType && !receiptData.orderType.includes("Market")) {
-            console.log("old mockData", mockData.length)
-            mockData.push(receiptData);
-            console.log("new mockData", mockData.length)
-            // }
+            // @ts-ignore
+            const receiptArray = receiptData.split('\n').map(line => line.split(': '));
+            const receiptObj = Object.fromEntries(receiptArray);
 
-            // Send a success response back
-            res.status(200).json({ message: 'Receipt data received successfully HIIIIIIIIIIIIIIIIIIIIIIII', data: receiptData });
+            const formattedData = {
+                refNumber: receiptObj.refNumber,
+                orderType: receiptObj.orderType,
+                price: receiptObj.price,
+                gpuCount: receiptObj.gpuCount,
+                startDate: new Date(receiptObj.time).toString(),
+                time: receiptObj.time,
+                total: receiptObj.total,
+                endTime: receiptObj.endTime
+            };
+
+            if (formattedData.orderType && !formattedData.orderType.includes("Market")) {
+                mockData.push(formattedData);
+            }
+
+            res.status(200).json({ message: 'Receipt data received successfully', data: formattedData });
         } else if (req.method === 'GET') {
             // Handle GET requests by returning the stored receipt data
             console.log("i received a get for processedMockData", mockData.length)
+            // console.log(mockData.at(-1))
+
             const processedMockData = processMockData(mockData)
+            // console.log(processedMockData.at(-1))
             res.status(200).json({ data: processedMockData });
         } else {
             // Handle any other HTTP methods

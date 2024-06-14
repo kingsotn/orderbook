@@ -16,7 +16,7 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-## Engineering Process: On Design and Other things
+## On Engineering, Design,' and Other things
 
 I've been tasked to build an auction website or [DEX](https://bitcoinwiki.org/wiki/) (Decentralized Exchange) for sfcomupte. The task was intentionally vague, with a focus for design engineering.
 
@@ -25,6 +25,7 @@ From my understanding, there's subtle functional differences between auctions an
 Thus,
 1) There had to be an [order book](https://en.wikipedia.org/wiki/Order_book) to keep track of buy and sell orders
 2) Users could fill out those orders
+3) keep things aggresively simple (no auth, no ssr)
 
 Creating these components weren't creatively difficult — [Binance](https://www.binance.com/en/trade/BTC_USDT?_from=markets&type=grid) and [Pheonix](https://app.phoenix.trade/market/4DoNfFBfF7UokCC2FQzriy7yHK6DY6NVdYpuekQ5pRgg) had very good UI/UX for DEXs.
 
