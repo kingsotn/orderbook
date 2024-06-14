@@ -5,6 +5,7 @@ import { DataTable } from './data-table';
 import { processedMockData } from './mock_data';
 import { Button, Skeleton } from '@nextui-org/react';
 import { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion"
 
 const UpDownSVG = () => (
     <svg
@@ -35,6 +36,33 @@ interface ReceiptData {
     endTime: string;
 }
 
+const parseReceiptData = (rawData: string): ReceiptData => {
+    const lines = rawData.split('\n');
+    const data: any = {};
+    lines.forEach(line => {
+        const [key, ...rest] = line.split(': ');
+        data[key] = rest.join(': ');
+    });
+    return data as ReceiptData;
+};
+
+
+// useEffect(() => {
+//     const fetchReceiptData = async () => {
+//         try {
+//             const response = await fetch('/api/order');
+//             const data = await response.json();
+//             const parsedData = data.data.map((rawData: string) => parseReceiptData(rawData));
+//             // parsedData.map((e: any) => console.log(e.value, typeof (e)))
+//             setReceiptData(parsedData);
+//         } catch (error) {
+//             console.error('Error fetching receipt data:', error);
+//         }
+//     };
+
+//     fetchReceiptData();
+// }, [processedMockData]); //receive anytime this changes
+
 // column definitions for the orderbook
 export const columns: ColumnDef<ReceiptData>[] = [
     {
@@ -57,8 +85,30 @@ export const columns: ColumnDef<ReceiptData>[] = [
         },
         cell: ({ row, column }) => {
             const price = parseFloat(row.getValue("price"));
-            return <div className="flex justify-left pl-6">{price.toFixed(2)}</div>;
-        },
+            const [isLoaded, setIsLoaded] = useState<boolean>(false);
+
+            useEffect(() => {
+                setIsLoaded(true);
+            }, []);
+
+            return (
+                <Skeleton
+                    isLoaded={isLoaded}
+                    className="before:-translate-x-1/8 before:opacity-35 rounded-md before:transition-none"
+                    disableAnimation
+                >
+                    <div className="flex justify-left pl-6">
+                        <motion.span
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.15 }}
+                        >
+                            {price.toFixed(2)}
+                        </motion.span>
+                    </div>
+                </Skeleton>
+            );
+        }
     },
     {
         accessorKey: "gpuCount",
@@ -74,16 +124,37 @@ export const columns: ColumnDef<ReceiptData>[] = [
                     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")
                     }
                     className={`pt-2 border-none bg-white ${isSorted ? 'font-semibold' : ''}`}
-
                 >
                     GPUs
                 </Button>
             )
         },
         cell: ({ row, column }) => {
-            const gpuCount = parseFloat(row.getValue("gpuCount"))
-            return <div className="flex justify-left pl-4">{gpuCount}</div>;
-        },
+            const gpuCount = parseFloat(row.getValue("gpuCount"));
+            const [isLoaded, setIsLoaded] = useState<boolean>(false);
+
+            useEffect(() => {
+                setIsLoaded(true);
+            }, []);
+
+            return (
+                <Skeleton
+                    isLoaded={isLoaded}
+                    className="before:-translate-x-1/8 before:opacity-35 rounded-md before:transition-none"
+                    disableAnimation
+                >
+                    <div className="flex justify-left pl-4">
+                        <motion.span
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.15 }}
+                        >
+                            {gpuCount}
+                        </motion.span>
+                    </div>
+                </Skeleton>
+            );
+        }
     },
     {
         accessorKey: "range",
@@ -105,9 +176,31 @@ export const columns: ColumnDef<ReceiptData>[] = [
             )
         },
         cell: ({ row, column }) => {
-            const range: string = row.getValue("range")
-            return <div className="flex justify-left">{range}</div>;
-        },
+            const range = row.getValue("range");
+            const [isLoaded, setIsLoaded] = useState<boolean>(false);
+
+            useEffect(() => {
+                setIsLoaded(true);
+            }, []);
+
+            return (
+                <Skeleton
+                    isLoaded={isLoaded}
+                    className="before:-translate-x-1/8 before:opacity-35 rounded-md before:transition-none"
+                    disableAnimation
+                >
+                    <div className="flex justify-left">
+                        <motion.span
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.15 }}
+                        >
+                            {range as string}
+                        </motion.span>
+                    </div>
+                </Skeleton>
+            );
+        }
     },
     {
         accessorKey: "hours",
@@ -123,7 +216,6 @@ export const columns: ColumnDef<ReceiptData>[] = [
                     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")
                     }
                     className={`pt-2 border-none bg-white ${isSorted ? 'font-semibold' : ''}`}
-
                 >
                     Hours
                 </Button >
@@ -131,7 +223,31 @@ export const columns: ColumnDef<ReceiptData>[] = [
         },
         cell: ({ row, column }) => {
             const hours = parseFloat(row.getValue("hours"))
-            return hours > 0 ? <div className="flex justify-end mr-6">{hours}</div> : <div className="flex justify-end mr-6"></div>; // don't render anything if hours ==0
+            const [isLoaded, setIsLoaded] = useState<boolean>(false)
+            useEffect(() => {
+                setIsLoaded(true)
+            }, [])
+            return (
+                <Skeleton
+                    isLoaded={isLoaded}
+                    className="before:-translate-x-1/8 before:opacity-35 rounded-md before:transition-none"
+                    disableAnimation
+                >
+                    <div className="flex justify-end mr-6">
+                        <motion.span
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.15 }}
+                        >
+                            {hours > 0 ? (
+                                <div className="flex justify-end mr-6">{hours}</div>
+                            ) : (
+                                <div className="flex justify-end mr-6"></div>
+                            )}
+                        </motion.span>
+                    </div >
+                </Skeleton >
+            )
         },
     },
     {
@@ -155,23 +271,38 @@ export const columns: ColumnDef<ReceiptData>[] = [
         },
         cell: ({ row, column }) => {
             const total = parseFloat(row.getValue("total")).toFixed(2);
-            return <div className="flex justify-end mr-6">{total}</div>;
-        },
+            const [isLoaded, setIsLoaded] = useState<boolean>(false);
+
+            useEffect(() => {
+                setIsLoaded(true);
+            }, []);
+
+            return (
+                <Skeleton
+                    isLoaded={isLoaded}
+                    className="before:-translate-x-1/8 before:opacity-35 rounded-md before:transition-none"
+                    disableAnimation
+                >
+                    <div className="flex justify-end mr-6">
+                        <motion.span
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.15 }}
+                        >
+                            {total}
+                        </motion.span>
+                    </div>
+                </Skeleton>
+            );
+        }
     }
 ];
 
 const OrderBook: React.FC = () => {
-    const [isLoaded, setIsLoaded] = useState(false);
-    useEffect(() => {
-        setIsLoaded(true)
-    }, []); // Empty dependency array ensures this runs once on component mount
-
     return (
-        <Skeleton isLoaded={isLoaded} className="before:-translate-x-1/8 before:opacity-35 rounded-md">
-            <div className="min-w-[500px] max-w-[500px]">
-                <DataTable columns={columns} data={processedMockData} />
-            </div>
-        </Skeleton>
+        <div className="min-w-[500px] max-w-[500px]">
+            <DataTable columns={columns} data={processedMockData} />
+        </div>
     );
 };
 

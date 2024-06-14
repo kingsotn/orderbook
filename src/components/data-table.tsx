@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     ColumnDef,
     SortingState,
@@ -56,8 +56,6 @@ export function DataTable<TData, TValue>({
         return value > marketPrice ? 'text-red-600' : "text-emerald-600"
     };
 
-    const marketPrice = 2.85;
-
     const renderTooltipContent = (row: any) => {
         const original = row.original;
 
@@ -106,6 +104,9 @@ export function DataTable<TData, TValue>({
     // useEffect(() => {
     //     setIsLoaded(true);
     // }, [])
+
+    // api that fetches the data
+
     return (
         <div className="rounded-md border bg-white">
             <Table>
