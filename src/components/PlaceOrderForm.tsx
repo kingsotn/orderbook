@@ -603,7 +603,7 @@ const PlaceOrderForm: React.FC = () => {
     const processedReceiptData = constructReceiptData(receiptData, marketPrice);
 
     // submit form
-    const handleSubmitForm = async () => {
+const handleSubmitForm = async () => {
         console.log("submitted");
 
         const formattedReceiptData = Object.entries(processedReceiptData)
