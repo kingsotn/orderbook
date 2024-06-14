@@ -88,7 +88,7 @@ nice looking good so far. Putting it all together ->
 
 ![](/images/currently.png)
 
-And that's what I currently have.
+Friday morning: Okay I deployed it on vercel, did some cleanup. Holy shit I didn't know vercel persists the app running in some background. My database of orders is just a const orders[] variable stored in memory. That's so awesome. And I tried it on another computer and the data is persistent. Guess you don't need a db after all.
 
 
 <!-- ## Learn More
